@@ -1,0 +1,830 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>StudyBinder ✦ Collectible Fanbase Space</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700;9..144,900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<!-- Supabase CDN Cloud Database Client -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+/* ============ MATCHA & PINK WHIMSICAL THEME ============ */
+:root{
+  --matcha-bg: #f2f7f2; 
+  --matcha-dark: #3a4f3a; 
+  --sakura-pink: #ffb7d5; 
+  --sakura-light: #fff0f5; 
+  --muted: #6b7e6b;
+  --paper: #ffffff;
+  --border: #d2e0d2;
+  --primary: #ff85b3; 
+  --primary-ink: #ffffff;
+  --shadow: 0 8px 24px rgba(58,79,58,.06);
+  --common: #a4b3a4;
+  --rare: #5aa9ff;
+  --epic: #b063ff;
+  --legendary: #ffae3b;
+  --secret: #ff5fb0;
+}
+*{box-sizing:border-box}
+body{margin:0;padding:0;background:var(--matcha-bg);color:var(--matcha-dark);font:15px/1.5 'Inter',system-ui,sans-serif;min-height:100vh}
+h1,h2,h3,.display{font-family:'Fraunces',serif;letter-spacing:-.02em}
+button{font:inherit;color:inherit;cursor:pointer}
+input,select,textarea{font:inherit}
+img{user-select:none;-webkit-user-drag:none}
+
+/* ============ LAYOUT ============ */
+.nav{position:sticky;top:0;z-index:30;backdrop-filter:blur(10px);background:rgba(242,247,242,.85);border-bottom:2px solid var(--border)}
+.nav-inner{max-width:1200px;margin:0 auto;padding:12px 18px;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;font-family:'Fraunces',serif;font-weight:900;font-size:24px;color:var(--matcha-dark)}
+.brand img{height:38px;width:auto;object-fit:contain}
+.brand span{color:var(--primary)}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-left:8px}
+.tab{padding:8px 16px;border-radius:999px;border:2px solid var(--border);background:#fff;font-size:13px;font-weight:600;color:var(--matcha-dark)}
+.tab.active{background:var(--sakura-pink);color:var(--matcha-dark);border-color:var(--primary)}
+.stats{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+.stat{display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;background:#fff;border:2px solid var(--border);font-size:13px;font-weight:600}
+.stat b{font-weight:800;color:var(--primary)}
+.main{max-width:1200px;margin:0 auto;padding:24px 18px 80px}
+.paper{background:var(--paper);border:2px solid var(--border);border-radius:24px;box-shadow:var(--shadow);padding:24px}
+.row{display:flex;gap:16px;flex-wrap:wrap}
+.col{flex:1;min-width:280px}
+.btn{display:inline-flex;gap:8px;align-items:center;justify-content:center;padding:10px 20px;border-radius:999px;border:2px solid var(--border);background:#fff;font-weight:700;color:var(--matcha-dark);transition:all 0.2s;text-decoration:none}
+.btn.primary{background:var(--primary);color:var(--primary-ink);border-color:var(--primary)}
+.btn.primary:hover{opacity:0.9}
+.btn.ghost{background:transparent;border-color:transparent}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.muted{color:var(--muted);font-size:13px}
+.center{text-align:center}
+.grid{display:grid;gap:16px}
+.g-cards{grid-template-columns:repeat(auto-fill, minmax(160px,1fr))}
+.page{display:none}
+.page.active{display:block;animation:fadein .3s ease}
+@keyframes fadein{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.chip{display:inline-block;padding:4px 10px;border-radius:99px;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase}
+.genre-badge{background:var(--sakura-light);color:var(--matcha-dark);border:1px solid var(--sakura-pink);padding:2px 8px;border-radius:6px;font-size:10px;font-weight:700}
+
+/* ============ GENRE FILTER BAR ============ */
+.genre-bar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:20px;justify-content:center}
+.genre-btn{padding:6px 14px;border-radius:8px;border:1px solid var(--border);background:#fff;font-size:12px;font-weight:600;cursor:pointer}
+.genre-btn.active{background:var(--matcha-dark);color:#fff;border-color:var(--matcha-dark)}
+
+/* ============ Q/A IDEA HUB STYLES ============ */
+.idea-form-card {background: var(--paper); border: 2px solid var(--border); border-radius: 18px; padding: 20px; margin-bottom: 24px;}
+.form-group-hub {margin-bottom: 14px; text-align: left;}
+.form-group-hub label {display: block; font-weight: 700; margin-bottom: 6px; font-size: 13px;}
+.form-group-hub input, .form-group-hub textarea {width: 100%; padding: 10px; border: 2px solid var(--border); border-radius: 10px; font-size: 14px; outline: none;}
+.form-group-hub input:focus, .form-group-hub textarea:focus {border-color: var(--primary);}
+.hub-kofi-card {background: #fffaf0; border: 2px solid #ffd166; border-radius: 18px; padding: 24px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; height: fit-content;}
+.ideas-feed h2 {font-size: 1.3rem; margin-bottom: 15px;}
+.idea-card {background: var(--paper); border: 2px solid var(--border); border-radius: 14px; padding: 16px; margin-bottom: 12px; display: flex; gap: 16px; align-items: flex-start; text-align: left; box-shadow: var(--shadow);}
+.vote-box {display: flex; flex-direction: column; align-items: center; background: var(--matcha-bg); border-radius: 8px; padding: 6px 10px; min-width: 48px; cursor: pointer; border: 1px solid transparent; transition: all 0.2s;}
+.vote-box:hover {border-color: var(--primary); background: var(--sakura-light);}
+.vote-arrow {font-size: 1.1rem; color: var(--muted);}
+.vote-count {font-weight: 700; font-size: 14px;}
+.idea-content {flex-grow: 1;}
+.idea-title {font-size: 16px; font-weight: 700; color: var(--matcha-dark); margin-bottom: 4px;}
+.idea-details {color: var(--muted); font-size: 13px; margin-bottom: 8px;}
+.status-tag {display: inline-block; font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 20px; text-transform: uppercase;}
+.status-review { background: #fee2e2; color: #ef4444; }
+.status-planned { background: #fef3c7; color: #d97706; }
+.status-progress { background: #e0f2fe; color: #0284c7; }
+
+/* ============ CUSTOM TIMER INPUTS ============ */
+.timer-wrap{display:flex;gap:24px;align-items:center;flex-wrap:wrap;justify-content:center}
+.timer-ring{position:relative;width:220px;height:220px}
+.timer-ring svg{transform:rotate(-90deg)}
+.timer-num{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.timer-num .t{font-family:'Fraunces',serif;font-size:44px;font-weight:900}
+.timer-num .l{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.15em}
+.custom-time-box{background:var(--matcha-bg);padding:12px;border-radius:16px;border:1px solid var(--border);margin-top:10px;text-align:center}
+.custom-time-box input{width:70px;padding:6px;border-radius:8px;border:2px solid var(--border);text-align:center;font-weight:700;color:var(--matcha-dark)}
+
+/* ============ PHOTOCARDS ============ */
+.card{position:relative;border-radius:18px;aspect-ratio:5/7;perspective:1200px;cursor:pointer}
+.card .inner{position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform .5s cubic-bezier(.2,.8,.2,1)}
+.card.flipped .inner{transform:rotateY(180deg)}
+.card .face{position:absolute;inset:0;border-radius:18px;overflow:hidden;backface-visibility:hidden;border:4px solid var(--common);box-shadow:0 8px 20px rgba(58,79,58,.12)}
+.card .face.back{transform:rotateY(180deg);background:var(--sakura-light);padding:16px;display:flex;flex-direction:column;justify-content:space-between;color:var(--matcha-dark)}
+.card .face img{width:100%;height:100%;object-fit:cover;display:block}
+.card .genre-tag{position:absolute;top:8px;right:8px;background:rgba(255,255,255,0.9);padding:2px 6px;border-radius:6px;font-size:10px;font-weight:700;color:var(--matcha-dark);border:1px solid var(--border)}
+.card .num{position:absolute;top:8px;left:8px;background:rgba(255,255,255,.9);border-radius:6px;padding:2px 6px;font-size:10px;font-weight:800}
+.card .name{position:absolute;left:0;right:0;bottom:0;padding:10px;color:#fff;background:linear-gradient(transparent, rgba(0,0,0,.75));display:flex;flex-direction:column;gap:2px;align-items:start}
+.card .name b{font-family:'Fraunces',serif;font-size:13px;line-height:1.2}
+.card.r-common .face{border-color:var(--common)}
+.card.r-rare .face{border-color:var(--rare)}
+.card.r-epic .face{border-color:var(--epic)}
+.card.r-legendary .face{border-color:var(--legendary)}
+.card.r-secret .face{border-color:var(--secret)}
+.card .fx{position:absolute;inset:0;pointer-events:none;mix-blend-mode:overlay;opacity:0}
+.card.r-rare .fx{opacity:.5;background:radial-gradient(circle at 30% 30%, #fff8 0 2px, transparent 3px) 0 0/20px 20px}
+.card.r-epic .fx{opacity:.8;background:linear-gradient(115deg, transparent 30%, rgba(255,255,255,.6) 50%, transparent 70%);background-size:300% 300%;animation:shimmer 3s linear infinite}
+.card.r-legendary .fx, .card.r-secret .fx{opacity:.9;background:conic-gradient(from 0deg, #ff79c6,#ffd166,#06d6a0,#118ab2,#ef476f,#ff79c6);animation:spin 6s linear infinite}
+@keyframes shimmer{0%{background-position:0% 0%}100%{background-position:300% 0%}}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.pre-card-box{width:100%;max-width:170px;aspect-ratio:5/7;border:3px dashed var(--border);border-radius:18px;margin:12px auto;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;overflow:hidden;background:#fafafa}
+.pre-card-box img{width:100%;height:100%;object-fit:cover}
+.pre-card-box .lock-overlay{position:absolute;inset:0;background:rgba(58,79,58,0.75);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:600}
+
+.bigcard{width:min(80vw,280px);aspect-ratio:5/7;margin:0 auto}
+.overlay{position:fixed;inset:0;background:rgba(58,79,58,.6);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;z-index:50;padding:20px}
+.overlay.open{display:flex;animation:fadein .25s}
+.modal{max-width:500px;width:100%;text-align:center;color:var(--matcha-dark);background:#fff;padding:24px;border-radius:28px;border:2px solid var(--border)}
+
+/* Invisible by default, unlocked with Admin credentials */
+.admin-box{margin-top:30px;border:2px dashed var(--primary);background:var(--sakura-light);display:none;}
+.form-group{margin-bottom:12px;text-align:left}
+.form-group label{display:block;font-size:12px;font-weight:700;margin-bottom:4px}
+.form-group input, .form-group select{width:100%;padding:8px 12px;border-radius:8px;border:2px solid var(--border)}
+
+.toasts{position:fixed;right:18px;bottom:18px;z-index:80;display:flex;flex-direction:column;gap:8px}
+.toast{background:var(--matcha-dark);color:#fff;padding:10px 16px;border-radius:12px;font-size:13px;box-shadow:var(--shadow);animation:slidein .25s}
+@keyframes slidein{from{transform:translateX(20px);opacity:0}to{transform:none;opacity:1}}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <div class="brand" id="hiddenAdminTrigger">
+      <img id="site-logo" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'><circle cx='50' cy='50' r='40' fill='%23ffb7d5'/><circle cx='40' cy='45' r='5' fill='%233a4f3a'/><circle cx='60' cy='45' r='5' fill='%233a4f3a'/><path d='M35,60 Q50,75 65,60' stroke='%233a4f3a' stroke-width='5' fill='none'/></svg>" alt="Logo">
+      Study<span>Binder</span>
+    </div>
+    <div class="tabs" id="tabs">
+      <button class="tab active" data-page="study">✦ Study Desk</button>
+      <button class="tab" data-page="collection">✦ Collection Album (<span id="nav-count">0</span>)</button>
+      <button class="tab" data-page="requests">✦ Requests & Support</button>
+    </div>
+    <div class="stats">
+      <div class="stat">✦ Lv <b id="s-level">1</b></div>
+      <div class="stat"><span id="s-xp">0</span>/<span id="s-xpmax">100</span> XP</div>
+      <div class="stat">✦ Streak <b id="s-streak">0</b></div>
+    </div>
+  </div>
+</nav>
+
+<main class="main">
+
+  <!-- ============ TIMER & UPLOAD ============ -->
+  <section class="page active" id="page-study">
+    <header class="center" style="margin-bottom:30px">
+      <h1 style="font-size:36px;margin:8px 0;color:var(--matcha-dark)">Focus Track Workspace</h1>
+      <p class="muted">Set your customized countdown, optionally stage a character photo, and complete the track to unlock rewards.</p>
+    </header>
+
+    <div class="row">
+      <!-- Timer Display Panel -->
+      <div class="paper col" style="flex: 1.5;">
+        <div class="timer-wrap">
+          <div class="timer-ring">
+            <svg width="220" height="220" viewBox="0 0 240 240">
+              <circle cx="120" cy="120" r="108" stroke="#e2eee2" stroke-width="12" fill="none"/>
+              <circle id="ring" cx="120" cy="120" r="108" stroke="var(--primary)" stroke-width="12" fill="none"
+                stroke-linecap="round" stroke-dasharray="678.58" stroke-dashoffset="0" style="transition: stroke-dashoffset 0.3s linear;"/>
+            </svg>
+            <div class="timer-num">
+              <div class="t" id="t-display">25:00</div>
+              <div class="l" id="t-label">TRACKING</div>
+            </div>
+          </div>
+          <div style="flex:1;min-width:220px">
+            
+            <!-- Custom Time Picker Input Box -->
+            <div class="custom-time-box">
+              <label style="display:block;font-size:11px;font-weight:700;margin-bottom:4px;text-transform:uppercase">⏱ Set Study Minutes</label>
+              <input type="number" id="custom-minutes-input" value="25" min="1" max="180">
+              <span style="font-weight:700;margin-left:4px">Min</span>
+            </div>
+
+            <div style="display:flex;gap:8px;margin-top:16px;justify-content:center">
+              <button class="btn primary" id="t-start">Start Track</button>
+              <button class="btn" id="t-pause">Pause</button>
+              <button class="btn ghost" id="t-reset">Reset</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pre-Session Upload Box -->
+      <div class="paper col" style="max-width:380px;">
+        <h3 style="margin-top:0" class="center">✦ Staged Session Photo</h3>
+        <p class="muted center" style="font-size:11px;margin-bottom:8px">Load a photo before starting the track to lock it into your album gallery drops.</p>
+        
+        <div class="pre-card-box" id="pre-dropzone">
+          <div id="pre-empty-state" class="center muted" style="padding:10px">
+            <span style="font-size:24px">✦</span>
+            <p style="margin:5px 0;font-size:11px">No file loaded</p>
+          </div>
+          <img id="pre-img-preview" src="" style="display:none">
+          <div id="pre-lock-banner" class="lock-overlay" style="display:none">
+            <span style="font-size:18px">🔒</span>
+            <span style="margin-top:4px;font-size:11px;text-transform:uppercase;letter-spacing:1px">Locked Until Done</span>
+          </div>
+        </div>
+
+        <div class="center">
+          <div class="form-group" style="margin-bottom:10px">
+            <label style="font-size:11px;text-align:center">Optional Character/Set Name</label>
+            <input type="text" id="user-card-name" placeholder="e.g. My Favorite Bias" style="padding:6px;border:2px solid var(--border);border-radius:8px;width:100%;text-align:center">
+          </div>
+          <div class="form-group" style="margin-bottom:10px">
+            <label style="font-size:11px;text-align:center">Genre Classification</label>
+            <select id="user-card-genre" style="padding:6px;border:2px solid var(--border);border-radius:8px;width:100%;font-size:12px">
+              <option value="BL">BL / Shounen-ai</option>
+              <option value="GL">GL / Shoujo-ai</option>
+              <option value="Anime">Anime / Manga</option>
+              <option value="K-drama">K-Drama / Actors</option>
+              <option value="Game">Game Characters</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <input type="file" id="user-photo-file" accept="image/*" style="display:none">
+          <button class="btn" id="userBrowseBtn" style="font-size:13px;width:100%">📁 Load Local Graphic</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- OWNER PRE-LOAD PLATFORM CONTROL (Now protected with display:none) -->
+    <div class="paper admin-box" id="adminControlBox">
+      <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer" id="toggleAdmin">
+        <h3 style="margin:0;color:var(--matcha-dark)">⚙ Owner Management Desk (Drop Pool Setup)</h3>
+        <span id="adminArrow">▼ Expand</span>
+      </div>
+      
+      <div id="adminContent" style="display:none;margin-top:15px;border-top:2px solid var(--border);padding-top:15px">
+        <p class="muted" style="margin-top:0">Upload shared global baseline templates into specific genre branches for users.</p>
+        <div class="row">
+          <div class="col">
+            <div class="form-group">
+              <label>Photocard Character Label Title</label>
+              <input type="text" id="adm-name" placeholder="e.g. Wei Wuxian / Lan Wangji">
+            </div>
+            <div class="form-group">
+              <label>Genre Branch Classification</label>
+              <select id="adm-genre">
+                <option value="BL">BL / Shounen-ai</option>
+                <option value="GL">GL / Shoujo-ai</option>
+                <option value="Anime">Anime / Manga Characters</option>
+                <option value="K-drama">K-Drama / Actors</option>
+                <option value="Game">Game Characters</option>
+                <option value="Other">Other Miscellaneous Fanbase</option>
+              </select>
+            </div>
+          </div>
+          <div class="col">
+            <div class="form-group">
+              <label>Frame Quality Tier</label>
+              <select id="adm-rarity">
+                <option value="common">Common Frame</option>
+                <option value="rare">Rare Frame</option>
+                <option value="epic">Epic Holographic Frame</option>
+                <option value="legendary">Legendary Prismatic Frame</option>
+                <option value="secret">Secret Universe Frame</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Upload Base Artwork Source</label>
+              <input type="file" id="adm-file" accept="image/*">
+            </div>
+            <button class="btn primary" id="adm-save-btn" style="width:100%;margin-top:6px">Commit Setup to Cloud Drop Pool</button>
+          </div>
+        </div>
+        <div style="margin-top:15px;display:flex;align-items:center;justify-content:space-between">
+          <span class="muted">Active Drops Pool Capacity: <b id="pool-count">0</b> master pieces loaded.</span>
+          <button class="btn ghost" id="clearPool" style="font-size:11px;color:red;padding:2px 8px">Wipe Current Cloud Pool</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ COLLECTION BINDER ============ -->
+  <section class="page" id="page-collection">
+    <header class="center" style="margin-bottom:20px">
+      <h1 style="color:var(--matcha-dark)">Collected Fan Binder</h1>
+      <p class="muted">Flip completed memory card chips to read chronological progress history records.</p>
+    </header>
+
+    <div class="genre-bar" id="album-filters">
+      <button class="genre-btn active" data-genre="all">Show All Branches</button>
+      <button class="genre-btn" data-genre="BL">BL</button>
+      <button class="genre-btn" data-genre="GL">GL</button>
+      <button class="genre-btn" data-genre="Anime">Anime</button>
+      <button class="genre-btn" data-genre="K-drama">K-Drama</button>
+      <button class="genre-btn" data-genre="Game">Games</button>
+      <button class="genre-btn" data-genre="Other">Other</button>
+    </div>
+
+    <div class="grid g-cards" id="collection-grid"></div>
+  </section>
+
+  <!-- ============ INTERACTIVE IDEAS & REQUESTS HUB ============ -->
+  <section class="page" id="page-requests">
+    <header class="center" style="margin-bottom:30px">
+      <h1 style="color:var(--matcha-dark)">✦ Requests & Support Hub</h1>
+      <p class="muted">Drop your custom photocard recommendations, request your ultimate favorites, and vote on additions!</p>
+    </header>
+
+    <div class="row" style="max-width:1000px; margin: 0 auto; gap:24px;">
+      <div class="col" style="flex: 1.3;">
+        <div class="idea-form-card">
+          <h3 style="margin-top:0; margin-bottom:12px;">📬 Suggest a Photocard Drop</h3>
+          <form id="ideaForm">
+            <div class="form-group-hub">
+              <label for="ideaTitle">Your Request / Bias Title</label>
+              <input type="text" id="ideaTitle" placeholder="e.g., Pink Hair Jimin / MDZS Wedding Set" required>
+            </div>
+            <div class="form-group-hub">
+              <label for="ideaDetails">Specific details or links?</label>
+              <textarea id="ideaDetails" rows="3" placeholder="Tell us which era or specific art variants you want added..." required></textarea>
+            </div>
+            <button type="submit" class="btn primary" style="width:100%; border-radius:10px;">Submit PC Suggestion</button>
+          </form>
+        </div>
+
+        <div class="ideas-feed">
+          <h3 style="text-align: left; margin-bottom: 12px;">✨ Live Community Wishes & Votes</h3>
+          <div id="ideasContainer"></div>
+        </div>
+      </div>
+
+      <div class="col" style="max-width:340px;">
+        <div class="hub-kofi-card">
+          <div style="font-size:36px">☕</div>
+          <h3 style="margin: 4px 0;">Ko-fi Launching Soon!</h3>
+          <p class="muted" style="font-size:12px; margin-bottom:14px;">Fuel our study workspace operations and asset design pools. The tip page is currently under construction and will be active soon!</p>
+          <button class="btn" style="width:100%; cursor: not-allowed; opacity: 0.6;" disabled>☕ Page Opening Soon</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<div class="overlay" id="overlay">
+  <div class="modal" id="modal-body"></div>
+</div>
+
+<div class="toasts" id="toasts"></div>
+
+<script>
+/* ============================================================
+   SUPABASE CONFIGURATION & SECRET PASSWORD SETUP
+============================================================ */
+const SUPABASE_URL = "YOUR_SUPABASE_URL"; 
+const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY"; 
+const ADMIN_PASSWORD = "PPWismylife"; // 🔑 Change this secret password to whatever you want!
+
+let supabaseClient = null;
+if (SUPABASE_URL !== "YOUR_SUPABASE_URL" && SUPABASE_ANON_KEY !== "YOUR_SUPABASE_ANON_KEY") {
+  supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+}
+
+/* ============================================================
+   ENGINE CONTROLS & LOCAL DATA STORAGE
+============================================================ */
+const RARITIES = {
+  common:    {label:'Common',    color:'#a4b3a4', weight:55, xp:10},
+  rare:      {label:'Rare',      color:'#5aa9ff', weight:28, xp:25},
+  epic:      {label:'Epic',      color:'#b063ff', weight:12, xp:50},
+  legendary: {label:'Legendary', color:'#ffae3b', weight:4,  xp:100},
+  secret:    {label:'Secret',    color:'#ff5fb0', weight:1,  xp:250},
+};
+const RARITY_ORDER = ['common','rare','epic','legendary','secret'];
+
+const DEFAULT_STATE = {
+  xp:0, level:1, streak:0, lastStudyDate:null,
+  userCards: [],
+  localVotedList: []
+};
+
+const KEY = 'studybinder-matcha-v6';
+let S = load();
+let cloudRequestsCache = []; 
+let cloudDropsCache = []; // Master drop pool data cache synced from cloud
+let stagedPhoto = null;
+let selectedFilterGenre = 'all';
+
+function load(){
+  try{
+    const raw = localStorage.getItem(KEY);
+    if(!raw) return structuredClone(DEFAULT_STATE);
+    const parsed = JSON.parse(raw);
+    return {...structuredClone(DEFAULT_STATE), ...parsed};
+  }catch{ return structuredClone(DEFAULT_STATE); }
+}
+function save(){ localStorage.setItem(KEY, JSON.stringify(S)); }
+function xpForLevel(l){ return 100 + (l-1)*60 }
+
+function addXp(n){
+  S.xp += n;
+  while(S.xp >= xpForLevel(S.level)){
+    S.xp -= xpForLevel(S.level);
+    S.level++;
+    toast(`✦ Level Up! Reached Rank Level ${S.level}`);
+  }
+}
+function rollRarity(){
+  let r = Math.random() * 100; let running = 0;
+  for(const k of RARITY_ORDER){
+    running += RARITIES[k].weight;
+    if(r <= running) return k;
+  }
+  return 'common';
+}
+
+/* ============================================================
+   TIMER IMPLEMENTATION
+============================================================ */
+let timerMin = 25, timerSec = 25*60, timerOrig = 25*60, timerInt=null;
+const mInput = document.getElementById('custom-minutes-input');
+
+function updateTimerFromInput() {
+  if (timerInt) return;
+  let val = parseInt(mInput.value, 10);
+  if (isNaN(val) || val < 1) val = 1;
+  if (val > 180) val = 180;
+  timerMin = val;
+  timerSec = val * 60;
+  timerOrig = val * 60;
+  tDisplay();
+}
+mInput.addEventListener('input', updateTimerFromInput);
+
+function tDisplay(){
+  const m=String(Math.floor(timerSec/60)).padStart(2,'0');
+  const s=String(timerSec%60).padStart(2,'0');
+  document.getElementById('t-display').textContent = `${m}:${s}`;
+  const c = 2*Math.PI*108;
+  document.getElementById('ring').style.strokeDashoffset = c*(1-timerSec/timerOrig);
+}
+
+function tStart(){
+  if(timerInt) return;
+  mInput.disabled = true;
+  timerInt = setInterval(()=>{
+    timerSec--;
+    if(timerSec<=0){ tDone(); }
+    tDisplay();
+  },1000);
+  if(stagedPhoto) {
+    document.getElementById('pre-lock-banner').style.display = 'flex';
+  }
+}
+function tPause(){ clearInterval(timerInt); timerInt=null; mInput.disabled = false; }
+function tReset(){ tPause(); updateTimerFromInput(); resetStagedArea(); }
+
+function tDone(){
+  tPause();
+  const rarity = rollRarity();
+  const titleField = document.getElementById('user-card-name').value.trim();
+  const genreField = document.getElementById('user-card-genre').value;
+  
+  let finalCardData = {
+    id: 'pc-' + Date.now(),
+    date: new Date().toLocaleDateString(),
+    rarity: rarity,
+    name: titleField || 'Staged Workspace Drop',
+    genre: genreField
+  };
+
+  if(stagedPhoto){
+    finalCardData.image = stagedPhoto.data;
+  } else if(cloudDropsCache.length > 0) {
+    // Filter matching rarity pool if available, fallback to pure random cloud pool item
+    let matches = cloudDropsCache.filter(item => item.rarity === rarity);
+    let randomTemplate = matches.length > 0 ? matches[Math.floor(Math.random() * matches.length)] : cloudDropsCache[Math.floor(Math.random() * cloudDropsCache.length)];
+    finalCardData.image = randomTemplate.image;
+    finalCardData.name = randomTemplate.name;
+    finalCardData.genre = randomTemplate.genre || 'Other';
+  } else {
+    finalCardData.image = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23fff0f5"/><text x="50" y="55" font-family="sans-serif" font-size="8" text-anchor="middle" fill="%233a4f3a">Standard Drop</text></svg>';
+  }
+
+  S.userCards.push(finalCardData);
+  addXp(RARITIES[rarity].xp);
+
+  const today = new Date().toISOString().slice(0,10);
+  if (S.lastStudyDate !== today) {
+    S.streak = (S.lastStudyDate === new Date(Date.now()-86400000).toISOString().slice(0,10)) ? S.streak + 1 : 1;
+    S.lastStudyDate = today;
+  }
+
+  save();
+  triggerReveal(finalCardData);
+  resetStagedArea();
+  renderAll();
+}
+
+function resetStagedArea(){
+  stagedPhoto = null;
+  document.getElementById('user-photo-file').value = "";
+  document.getElementById('user-card-name').value = "";
+  document.getElementById('pre-empty-state').style.display = 'block';
+  document.getElementById('pre-img-preview').style.display = 'none';
+  document.getElementById('pre-lock-banner').style.display = 'none';
+}
+
+/* ============================================================
+   REVEAL MODAL DISPLAY & PHOTOCARD DOM GENERATOR
+============================================================ */
+function triggerReveal(card){
+  const overlay = document.getElementById('overlay');
+  const modal = document.getElementById('modal-body');
+  overlay.className = "overlay open";
+  
+  modal.innerHTML = `
+    <div style="display:flex;flex-direction:column;align-items:center;gap:18px">
+      <h2 style="font-family:Fraunces;margin:0;color:var(--matcha-dark)">✦ Drop Unlocked!</h2>
+      <div class="bigcard">${renderCardTemplate(card)}</div>
+      <div>
+        <h3 style="margin:4px 0">${card.name}</h3>
+        <span class="genre-badge">${card.genre}</span>
+      </div>
+      <button class="btn primary" id="closeRevealBtn" style="width:100%">Add To Album</button>
+    </div>
+  `;
+  bindCardInteractions(modal);
+  document.getElementById('closeRevealBtn').onclick = () => { overlay.className = "overlay"; };
+}
+
+function renderCardTemplate(c){
+  return `
+    <div class="card r-${c.rarity}" data-id="${c.id}">
+      <div class="inner">
+        <div class="face front">
+          <img src="${c.image}">
+          <div class="fx"></div>
+          <div class="num">✦ ${c.date}</div>
+          <span class="genre-tag">${c.genre}</span>
+          <div class="name">
+            <div><b>${escapeHtml(c.name)}</b></div>
+            <span class="chip" style="background:${RARITIES[c.rarity].color}">${RARITIES[c.rarity].label}</span>
+          </div>
+        </div>
+        <div class="face back">
+          <div>
+            <div style="font-family:Fraunces;font-size:15px;font-weight:800;color:var(--primary)">StudyBinder Album</div>
+            <hr style="border:none;border-top:2px solid var(--border);margin:10px 0">
+            <p style="font-size:12px;color:var(--matcha-dark)">Processed drop earned cleanly via focused task completion session block.</p>
+          </div>
+          <div style="font-size:11px;opacity:.8">TRACK RECORD:<br><b>${c.date}</b></div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function bindCardInteractions(scope){
+  scope.querySelectorAll('.card').forEach(el=>{
+    el.onclick = () => el.classList.toggle('flipped');
+    el.onpointermove = (e) => {
+      if(el.classList.contains('flipped')) return;
+      const r = el.getBoundingClientRect();
+      const px=(e.clientX-r.left)/r.width-.5;
+      const py=(e.clientY-r.top)/r.height-.5;
+      el.querySelector('.inner').style.transform = `rotateX(${-py*14}deg) rotateY(${px*18}deg)`;
+    };
+    el.onpointerleave = () => {
+      if(!el.classList.contains('flipped')) el.querySelector('.inner').style.transform = '';
+    };
+  });
+}
+
+/* ============================================================
+   SUPABASE LIVE DATA SYNC LAYER
+============================================================ */
+async function fetchCloudData() {
+  if (!supabaseClient) {
+    cloudRequestsCache = [
+      {id: 'demo-1', title: 'Add Dark Mode layout setting', details: 'The dashboard background options are bright.', votes: 42, status: 'progress'},
+    ];
+    cloudDropsCache = [];
+    renderRequestsFeed();
+    renderAll();
+    return;
+  }
+  
+  // 1. Fetch suggestions board
+  const reqRes = await supabaseClient.from('community_requests').select('*');
+  if (!reqRes.error && reqRes.data) cloudRequestsCache = reqRes.data;
+
+  // 2. Fetch shared global card design templates pool
+  const dropRes = await supabaseClient.from('master_drops_pool').select('*');
+  if (!dropRes.error && dropRes.data) cloudDropsCache = dropRes.data;
+
+  renderRequestsFeed();
+  renderAll();
+}
+
+// Secret Door Handler: Click the site logo 7 times to reveal the login prompt!
+let logoClicks = 0;
+document.getElementById('hiddenAdminTrigger').addEventListener('click', () => {
+  logoClicks++;
+  if(logoClicks >= 7) {
+    const accessCode = prompt("Enter secret Owner Desk verification password:");
+    if(accessCode === ADMIN_PASSWORD) {
+      document.getElementById('adminControlBox').style.display = 'block';
+      toast("🔑 Owner Desk Access Unlocked!");
+    } else {
+      toast("❌ Wrong validation pass.");
+    }
+    logoClicks = 0;
+  }
+});
+
+document.getElementById('adm-save-btn').onclick = async () => {
+  const nameInput = document.getElementById('adm-name');
+  const genreSelect = document.getElementById('adm-genre');
+  const raritySelect = document.getElementById('adm-rarity');
+  const fileInput = document.getElementById('adm-file');
+  
+  if(!nameInput.value || !fileInput.files[0]){
+    alert("Please write a master template label title and select a graphic file.");
+    return;
+  }
+  
+  const rdr = new FileReader();
+  rdr.onload = async () => {
+    if (supabaseClient) {
+      const { error } = await supabaseClient
+        .from('master_drops_pool')
+        .insert([{ 
+          name: nameInput.value, 
+          genre: genreSelect.value, 
+          rarity: raritySelect.value, 
+          image: rdr.result 
+        }]);
+      if(error) {
+        alert("Upload error! Your image file might be too big for a free database row entry.");
+      } else {
+        toast("✦ Custom design template saved to Cloud Database!");
+        fetchCloudData();
+      }
+    } else {
+      cloudDropsCache.push({ name: nameInput.value, genre: genreSelect.value, rarity: raritySelect.value, image: rdr.result });
+      toast("✦ Local test environment cache loaded.");
+      renderAll();
+    }
+    nameInput.value = ""; fileInput.value = "";
+  };
+  rdr.readAsDataURL(fileInput.files[0]);
+};
+
+document.getElementById('clearPool').onclick = async () => {
+  if(confirm("Purge master cloud preset template pool values?")){
+    if(supabaseClient) {
+      await supabaseClient.from('master_drops_pool').delete().neq('name', 'placeholder_safety_row');
+      fetchCloudData();
+    } else {
+      cloudDropsCache = []; renderAll();
+    }
+  }
+};
+
+document.getElementById('ideaForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const title = document.getElementById('ideaTitle').value.trim();
+  const details = document.getElementById('ideaDetails').value.trim();
+  const generatedId = 'req-' + Date.now();
+  
+  if (supabaseClient) {
+    await supabaseClient.from('community_requests').insert([{ id: generatedId, title, details, votes: 1, status: 'review' }]);
+    S.localVotedList.push(generatedId); save(); fetchCloudData();
+  } else {
+    cloudRequestsCache.unshift({ id: generatedId, title, details, votes: 1, status: 'review' });
+    S.localVotedList.push(generatedId); save(); renderRequestsFeed();
+  }
+  document.getElementById('ideaForm').reset();
+  toast("✦ PC Request submitted to the board!");
+});
+
+async function handleVote(id) {
+  const isVoted = S.localVotedList.includes(id);
+  const TargetRow = cloudRequestsCache.find(r => r.id === id);
+  if (!TargetRow) return;
+
+  let nextVoteValue = isVoted ? (TargetRow.votes || 1) - 1 : (TargetRow.votes || 0) + 1;
+  if(nextVoteValue < 0) nextVoteValue = 0;
+
+  if (supabaseClient) {
+    const { error } = await supabaseClient.from('community_requests').update({ votes: nextVoteValue }).eq('id', id);
+    if (!error) {
+      if (isVoted) S.localVotedList = S.localVotedList.filter(item => item !== id);
+      else S.localVotedList.push(id);
+      save(); fetchCloudData();
+    }
+  } else {
+    TargetRow.votes = nextVoteValue;
+    if (isVoted) S.localVotedList = S.localVotedList.filter(item => item !== id);
+    else S.localVotedList.push(id);
+    save(); renderRequestsFeed();
+  }
+}
+
+function renderRequestsFeed() {
+  const container = document.getElementById('ideasContainer');
+  if(!container) return;
+  const sortedRequests = [...cloudRequestsCache].sort((a,b) => (b.votes || 0) - (a.votes || 0));
+  if(sortedRequests.length === 0) {
+    container.innerHTML = `<p class="muted" style="padding:20px; text-align:center;">No suggestions dropped yet.</p>`;
+    return;
+  }
+  container.innerHTML = sortedRequests.map(r => {
+    const hasUserVoted = S.localVotedList.includes(r.id);
+    let statusClass = 'status-review'; let statusTxt = 'Under Review';
+    if(r.status === 'planned') { statusClass = 'status-planned'; statusTxt = 'Planned'; }
+    if(r.status === 'progress') { statusClass = 'status-progress'; statusTxt = 'In Progress'; }
+    return `
+      <div class="idea-card">
+        <div class="vote-box" onclick="handleVote('${r.id}')" style="${hasUserVoted ? 'border-color:var(--primary); background:var(--sakura-light);' : ''}">
+          <span class="vote-arrow" style="${hasUserVoted ? 'color:var(--primary);' : ''}">▲</span>
+          <span class="vote-count">${r.votes || 0}</span>
+        </div>
+        <div class="idea-content">
+          <div class="idea-title">${escapeHtml(r.title)}</div>
+          <div class="idea-details">${escapeHtml(r.details)}</div>
+          <span class="status-tag ${statusClass}">${statusTxt}</span>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+/* ============================================================
+   UI VIEW SYNCHRONIZATION
+============================================================ */
+function renderAll(){
+  document.getElementById('s-level').textContent = S.level;
+  document.getElementById('s-xp').textContent = S.xp;
+  document.getElementById('s-xpmax').textContent = xpForLevel(S.level);
+  document.getElementById('s-streak').textContent = S.streak;
+  document.getElementById('nav-count').textContent = S.userCards.length;
+  document.getElementById('pool-count').textContent = cloudDropsCache.length;
+
+  const grid = document.getElementById('collection-grid');
+  const filtered = S.userCards.filter(c => selectedFilterGenre === 'all' || c.genre === selectedFilterGenre);
+
+  if(filtered.length === 0){
+    grid.innerHTML = `<div class="paper center muted" style="grid-column: 1/-1;padding:40px;">No cards found matching this filter branch yet.</div>`;
+  } else {
+    grid.innerHTML = filtered.map(c => renderCardTemplate(c)).reverse().join('');
+    bindCardInteractions(grid);
+  }
+}
+
+document.querySelectorAll('#tabs .tab').forEach(t => t.onclick = () => {
+  document.querySelectorAll('#tabs .tab').forEach(x=>x.classList.remove('active'));
+  t.classList.add('active');
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+t.dataset.page).classList.add('active');
+  if (t.dataset.page === 'requests' || t.dataset.page === 'study') fetchCloudData();
+  renderAll();
+});
+
+document.querySelectorAll('#album-filters .genre-btn').forEach(btn => btn.onclick = () => {
+  document.querySelectorAll('#album-filters .genre-btn').forEach(x=>x.classList.remove('active'));
+  btn.classList.add('active');
+  selectedFilterGenre = btn.dataset.genre;
+  renderAll();
+});
+
+document.getElementById('t-start').onclick = tStart;
+document.getElementById('t-pause').onclick = tPause;
+document.getElementById('t-reset').onclick = tReset;
+document.getElementById('userBrowseBtn').onclick = () => document.getElementById('user-photo-file').click();
+document.getElementById('user-photo-file').onchange = (e) => {
+  const f = e.target.files[0]; if(!f) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    stagedPhoto = { data: reader.result };
+    document.getElementById('pre-empty-state').style.display = 'none';
+    const prev = document.getElementById('pre-img-preview');
+    prev.src = reader.result; prev.style.display = 'block';
+    toast("✦ Graphic loaded for staging!");
+  };
+  reader.readAsDataURL(f);
+};
+
+document.getElementById('toggleAdmin').onclick = () => {
+  const content = document.getElementById('adminContent');
+  const arrow = document.getElementById('adminArrow');
+  if(content.style.display === 'none'){ content.style.display = 'block'; arrow.textContent = '▲ Collapse'; }
+  else { content.style.display = 'none'; arrow.textContent = '▼ Expand'; }
+};
+
+function toast(msg){
+  const el = document.createElement('div'); el.className='toast'; el.textContent=msg;
+  document.getElementById('toasts').appendChild(el);
+  setTimeout(()=>{ el.style.opacity='0'; setTimeout(()=>el.remove(),300); }, 2200);
+}
+function escapeHtml(s){ return String(s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+tDisplay();
+renderAll();
+fetchCloudData();
+</script>
+</body>
+</html>
