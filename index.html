@@ -576,12 +576,24 @@ function renderCardTemplate(c){
             <p style="font-size:12px;color:var(--matcha-dark)">Processed drop earned cleanly via focused task completion session block.</p>
           </div>
           <div style="font-size:11px;opacity:.8">TRACK RECORD:<br><b>${c.date}</b></div>
+          <button onclick="event.stopPropagation(); deleteCardFromAlbum('${c.id}')" style="background: #ff4d4d; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; margin-top: 10px; font-size: 11px; font-weight: bold; width: 100%;">🗑️ Delete Card</button>
         </div>
       </div>
     </div>
   `;
 }
+function deleteCardFromAlbum(cardId) {
+    if (!confirm("Are you sure you want to delete this photocard from your binder?")) return;
 
+    let album = JSON.parse(localStorage.getItem('album')) || [];
+    album = album.filter(card => card.id !== cardId);
+    localStorage.setItem('album', JSON.stringify(album));
+    
+    // Checks if a standard refresh function exists, otherwise updates the view dynamically
+    if (typeof renderAlbum === 'function') renderAlbum();
+    else if (typeof displayAlbum === 'function') displayAlbum();
+    else location.reload();
+}
 function bindCardInteractions(scope){
   scope.querySelectorAll('.card').forEach(el=>{
     el.onclick = () => el.classList.toggle('flipped');
