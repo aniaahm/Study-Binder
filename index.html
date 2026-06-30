@@ -639,36 +639,36 @@ function renderCardTemplate(c){
 }
 
 function deleteCardFromAlbum(cardId, cardName) {
-    if (!confirm("Are you sure you want to delete this photocard from your binder?")) return;
-
-    // 1. Detect active storage group keys
-    let keyName = 'album';
-    if (!localStorage.getItem('album') && localStorage.getItem('studyBinder_album')) {
-        keyName = 'studyBinder_album';
-    } else if (!localStorage.getItem('album') && localStorage.getItem('user_album')) {
-        keyName = 'user_album';
+    // 1. Instantly ask the user for confirmation
+    if (!confirm("Are you sure you want to delete this photocard from your binder?")) {
+        return;
     }
 
-    let album = JSON.parse(localStorage.getItem(keyName)) || [];
-
-    // 2. Filter matching criteria (catches real card IDs AND broken blank local storage text values)
-    album = album.filter(card => {
-        if (!card) return false;
-        if (cardId && card.id && String(card.id) === String(cardId)) return false;
-        
-        // Match condition for old test cards that have no ID variables assigned to them
-        if (!cardId || cardId === '') {
-            if (card.name === cardName) return false;
-            if (!card.id && (!card.name || card.name.includes("Staged Workspace"))) return false;
+    // 2. Clear it completely out of every possible localStorage array variation
+    const storageKeys = ['album', 'studyBinder_album', 'user_album', 'user_cards', 'cards'];
+    
+    storageKeys.forEach(key => {
+        try {
+            let items = JSON.parse(localStorage.getItem(key));
+            if (Array.isArray(items)) {
+                // Filter out matching cards by checking both numeric and string values
+                items = items.filter(c => c && String(c.id) !== String(cardId));
+                localStorage.setItem(key, JSON.stringify(items));
+            }
+        } catch (e) {
+            console.error("Error clearing key " + key, e);
         }
-        return true;
     });
 
-    // 3. Update the storage array
-    localStorage.setItem(keyName, JSON.stringify(album));
-    
-    // 4. Force screen re-draw
-    if (typeof renderAlbum === 'function') renderAlbum();
+    // 3. Clear it out from active filtering scopes running in active memory
+    if (typeof cloudCards !== 'undefined') cloudCards = cloudCards.filter(c => c && String(c.id) !== String(cardId));
+    if (typeof allCards !== 'undefined') allCards = allCards.filter(c => c && String(c.id) !== String(cardId));
+
+    toast("Card removed successfully!");
+
+    // 4. Force screen re-draw dynamically
+    if (typeof renderAll === 'function') renderAll();
+    else if (typeof renderAlbum === 'function') renderAlbum();
     else if (typeof displayAlbum === 'function') displayAlbum();
     else if (typeof updateAlbumUI === 'function') updateAlbumUI();
     else location.reload();
