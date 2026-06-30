@@ -310,39 +310,32 @@ img{user-select:none;-webkit-user-drag:none}
   <!-- ============ COLLECTION BINDER ============ -->
   <section class="page" id="page-collection">
     <header class="center" style="margin-bottom:20px">
-      <h1 style="color:var(--matcha-dark)">Collected Fan Binder</h1>
-      <p class="muted">Flip completed memory card chips to read chronological progress history records.</p>
-    </header>
-<section class="page" id="page-collection">
-    <header class="center" style="margin-bottom:20px">
-        <h1 style="color:var(--matcha-dark)">Collected Fan Binder</h1>
-        <p class="p class="muted">Flip completed memory card chips to read chronological progress history records.</p>
-    </header>
+    <h1 style="color:var(--matcha-dark)">Collected Fan Binder</h1>
+    <p class="muted">Flip completed memory card chips to read chronological progress history records.</p>
+</header>
 
-    <div id="authContainer" style="max-width: 400px; margin: 0 auto 30px auto; padding: 20px; background: #fff; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: center;">
-        <h3 style="font-family: Fraunces; color: var(--matcha-dark);">Access Your Binder Account</h3>
-        <input type="email" id="authEmail" placeholder="Enter email address" style="width: 100%; padding: 10px; margin: 8px 0; border: 1px solid var(--border); border-radius: 6px;">
-        <input type="password" id="authPassword" placeholder="Enter account password" style="width: 100%; padding: 10px; margin: 8px 0; border: 1px solid var(--border); border-radius: 6px;">
-        
-        <div style="display: flex; gap: 10px; margin-top: 10px;">
-            <button onclick="handleUserSignUp()" class="btn" style="flex: 1; background: #e2e8f0; color: #334155;">Sign Up</button>
-            <button onclick="handleUserLogin()" class="btn primary" style="flex: 1;">Log In</button>
-        </div>
+<div id="authContainer" style="max-width: 400px; margin: 0 auto 30px auto; padding: 20px; background: #fff; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: center;">
+    <h3 style="font-family: Fraunces; color: var(--matcha-dark);">Access Your Binder Account</h3>
+    <input type="email" id="authEmail" placeholder="Enter email address" style="width: 100%; padding: 10px; margin: 8px 0; border: 1px solid var(--border); border-radius: 6px;">
+    <input type="password" id="authPassword" placeholder="Enter account password" style="width: 100%; padding: 10px; margin: 8px 0; border: 1px solid var(--border); border-radius: 6px;">
+    
+    <div style="display: flex; gap: 10px; margin-top: 10px;">
+        <button onclick="handleUserSignUp()" class="btn" style="flex: 1; background: #e2e8f0; color: #334155;">Sign Up</button>
+        <button onclick="handleUserLogin()" class="btn primary" style="flex: 1;">Log In</button>
     </div>
+</div>
 
-    <div class="genre-bar" id="album-filters">
-        <button class="genre-btn active" data-genre="all">Show All Branches</button>
-    <div class="genre-bar" id="album-filters">
-      <button class="genre-btn active" data-genre="all">Show All Branches</button>
-      <button class="genre-btn" data-genre="BL">BL</button>
-      <button class="genre-btn" data-genre="GL">GL</button>
-      <button class="genre-btn" data-genre="Anime">Anime</button>
-      <button class="genre-btn" data-genre="K-drama">K-Drama</button>
-      <button class="genre-btn" data-genre="Game">Games</button>
-      <button class="genre-btn" data-genre="Other">Other</button>
-    </div>
+<div class="genre-bar" id="album-filters">
+    <button class="genre-btn active" data-genre="all">Show All Branches</button>
+    <button class="genre-btn" data-genre="BL">BL</button>
+    <button class="genre-btn" data-genre="GL">GL</button>
+    <button class="genre-btn" data-genre="Anime">Anime</button>
+    <button class="genre-btn" data-genre="K-drama">K-Drama</button>
+    <button class="genre-btn" data-genre="Game">Games</button>
+    <button class="genre-btn" data-genre="Other">Other</button>
+</div>
 
-    <div class="grid g-cards" id="collection-grid"></div>
+<div class="grid g-cards" id="collection-grid"></div>
   </section>
 
   <!-- ============ INTERACTIVE IDEAS & REQUESTS HUB ============ -->
@@ -407,12 +400,11 @@ if (SUPABASE_URL !== "YOUR_SUPABASE_URL" && SUPABASE_ANON_KEY !== "YOUR_SUPABASE
   supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 }
 
-// 🔐 PASTE YOUR AUTHENTICATION JAVASCRIPT FUNCTIONS HERE:
+// 🔐 AUTHENTICATION JAVASCRIPT FUNCTIONS 
 async function handleUserSignUp() {
     const email = document.getElementById('authEmail').value;
     const password = document.getElementById('authPassword').value;
     if(!email || !password) return alert("Please fill in all email and password fields.");
-
     if (!supabaseClient) return alert("Supabase configuration is missing!");
 
     const { data, error } = await supabaseClient.auth.signUp({ email, password });
