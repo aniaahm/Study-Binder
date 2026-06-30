@@ -673,6 +673,44 @@ function deleteCardFromAlbum(cardId, cardName) {
     else if (typeof updateAlbumUI === 'function') updateAlbumUI();
     else location.reload();
 }
+  // =========================================================
+    // 🗑️ USER-CONTROLLED CUSTOM PHOTOCARD DELETION
+    // =========================================================
+    function deleteCard(id) {
+        if (!confirm("Are you sure you want to delete this custom photocard?")) {
+            return;
+        }
+
+        // 1. Wipe it from all possible Local Storage array variations
+        let localCards = [];
+        try {
+            localCards = JSON.parse(localStorage.getItem('user_cards') || '[]');
+        } catch(e) {
+            localCards = [];
+        }
+        localCards = localCards.filter(c => c && String(c.id) !== String(id));
+        localStorage.setItem('user_cards', JSON.stringify(localCards));
+
+        ['album', 'studyBinder_album', 'user_album'].forEach(key => {
+            let items = JSON.parse(localStorage.getItem(key) || '[]');
+            if (Array.isArray(items) && items.length) {
+                items = items.filter(c => c && String(c.id) !== String(id));
+                localStorage.setItem(key, JSON.stringify(items));
+            }
+        });
+
+        // 2. Clear out from active filters running in current memory
+        if (typeof cloudCards !== 'undefined') cloudCards = cloudCards.filter(c => c && String(c.id) !== String(id));
+        if (typeof allCards !== 'undefined') allCards = allCards.filter(c => c && String(c.id) !== String(id));
+
+        toast("Card deleted successfully!");
+        
+        // 3. Force re-draw components instantly
+        if (typeof renderAll === "function") renderAll();
+        else if (typeof renderAlbum === "function") renderAlbum();
+        else location.reload();
+    }
+
 function bindCardInteractions(scope){
   scope.querySelectorAll('.card').forEach(el=>{
     el.onclick = () => el.classList.toggle('flipped');
@@ -916,10 +954,24 @@ function toast(msg){
   document.getElementById('toasts').appendChild(el);
   setTimeout(()=>{ el.style.opacity='0'; setTimeout(()=>el.remove(),300); }, 2200);
 }
-function escapeHtml(s){ return String(s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function escapeHtml(s){ return String(s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c])); }
+
+// Check if a user is logged in to hide the Auth Box
+if (supabaseClient) {
+    supabaseClient.auth.getSession().then(({ data: { session } }) => {
+        if (session) {
+            // Hide the login container if user exists
+            const authBox = document.getElementById('authContainer');
+            if (authBox) authBox.style.display = 'none';
+        }
+    });
+}
 
 tDisplay();
 renderAll();
+if (typeof fetchCloudData === "function") {
+    fetchCloudData();
+}
 fetchCloudData();
 </script>
 </body>
