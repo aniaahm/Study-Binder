@@ -576,8 +576,7 @@ function renderCardTemplate(c){
             <p style="font-size:12px;color:var(--matcha-dark)">Processed drop earned cleanly via focused task completion session block.</p>
           </div>
           <div style="font-size:11px;opacity:.8">TRACK RECORD:<br><b>${c.date}</b></div>
-          <button onclick="event.stopPropagation(); deleteCardFromAlbum('${c.id}')" style="background: #ff4d4d; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; margin-top: 10px; font-size: 11px; font-weight: bold; width: 100%;">🗑️ Delete Card</button>
-        </div>
+<button onclick="event.stopPropagation(); deleteCardFromAlbum('${c.id}')" style="position: absolute; top: 40px; right: 8px; background: #ff4d4d; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 10px; font-weight: bold; z-index: 20;">🗑️</button>        </div>
       </div>
     </div>
   `;
