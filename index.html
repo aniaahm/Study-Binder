@@ -573,7 +573,103 @@ function resetStagedArea(){
   document.getElementById('pre-img-preview').style.display = 'none';
   document.getElementById('pre-lock-banner').style.display = 'none';
 }
+// This is the end of your resetStagedArea function or whatever sits above line 577
+}
 
+/* ============================================================
+   SLIDING MINOR FILTERS IMPLEMENTATION (OPTION 2)
+============================================================ */
+function setupDynamicSubFilters() {
+  const albumFilters = document.getElementById('album-filters');
+  
+  let subContainer = document.getElementById('sub-genre-bar');
+  if (!subContainer) {
+    subContainer = document.createElement('div');
+    subContainer.id = 'sub-genre-bar';
+    subContainer.style.cssText = "display:none; gap:6px; flex-wrap:wrap; margin-top:10px; margin-bottom:20px; justify-content:center; padding:8px; background:rgba(255,183,213,0.15); border-radius:12px; border:1px dashed var(--sakura-pink); animation:fadein 0.25s ease;";
+    albumFilters.parentNode.insertBefore(subContainer, albumFilters.nextSibling);
+  }
+
+  albumFilters.querySelectorAll('.genre-btn').forEach(btn => {
+    btn.onclick = () => {
+      albumFilters.querySelectorAll('.genre-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      
+      selectedFilterGenre = btn.getAttribute('data-genre');
+      selectedFilterSubGenre = 'all'; 
+
+      renderSubFilterRow(subContainer);
+      renderCollectionGrid();
+    };
+  });
+}
+
+function renderSubFilterRow(container) {
+  if (selectedFilterGenre === 'all') {
+    container.style.display = 'none';
+    return;
+  }
+
+  const uniqueSubs = new Set();
+  S.userCards.forEach(c => {
+    if (c.genre && c.genre.toLowerCase() === selectedFilterGenre.toLowerCase() && c.sub_genre && c.sub_genre !== 'All') {
+      uniqueSubs.add(c.sub_genre);
+    }
+  });
+
+  if (uniqueSubs.size === 0) {
+    container.style.display = 'none';
+    return;
+  }
+
+  let html = `<span style="font-size:12px; font-weight:700; color:var(--matcha-dark); display:flex; align-items:center; margin-right:6px;">👉 Sub-sections:</span>`;
+  html += `<button class="genre-btn ${selectedFilterSubGenre === 'all' ? 'active' : ''}" data-sub="all" style="font-size:11px; padding:4px 10px;">Show All ${selectedFilterGenre}</button>`;
+  
+  uniqueSubs.forEach(subName => {
+    html += `<button class="genre-btn ${selectedFilterSubGenre === subName ? 'active' : ''}" data-sub="${subName}" style="font-size:11px; padding:4px 10px;">${subName}</button>`;
+  });
+
+  container.innerHTML = html;
+  container.style.display = 'flex';
+
+  container.querySelectorAll('.genre-btn').forEach(subBtn => {
+    subBtn.onclick = () => {
+      container.querySelectorAll('.genre-btn').forEach(b => b.classList.remove('active'));
+      subBtn.classList.add('active');
+      selectedFilterSubGenre = subBtn.getAttribute('data-sub');
+      renderCollectionGrid();
+    };
+  });
+}
+
+function renderCollectionGrid() {
+  const grid = document.getElementById('collection-grid');
+  
+  let filtered = S.userCards;
+  if (selectedFilterGenre !== 'all') {
+    filtered = filtered.filter(c => c.genre && c.genre.toLowerCase() === selectedFilterGenre.toLowerCase());
+  }
+
+  if (typeof selectedFilterSubGenre !== 'undefined' && selectedFilterSubGenre !== 'all') {
+    filtered = filtered.filter(c => c.sub_genre && c.sub_genre === selectedFilterSubGenre);
+  }
+
+  if (filtered.length === 0) {
+    grid.innerHTML = `<div class="col center muted" style="padding:40px; grid-column: 1/-1;">No matching cards inside this binder section slot yet. Completed tracks drop cards here!</div>`;
+    return;
+  }
+
+  grid.innerHTML = filtered.map(c => renderCardTemplate(c)).join('');
+  bindCardInteractions(grid);
+}
+
+
+/* ============================================================
+    REVEAL MODAL DISPLAY & PHOTOCARD DOM GENERATOR
+============================================================ */
+function triggerReveal(card){
+  const overlay = document.getElementById('overlay');
+  // ... (Your old code continues completely fine here from line 581 onwards)
 /* ============================================================
    REVEAL MODAL DISPLAY & PHOTOCARD DOM GENERATOR
 ============================================================ */
@@ -920,12 +1016,7 @@ document.querySelectorAll('#tabs .tab').forEach(t => t.onclick = () => {
   renderAll();
 });
 
-document.querySelectorAll('#album-filters .genre-btn').forEach(btn => btn.onclick = () => {
-  document.querySelectorAll('#album-filters .genre-btn').forEach(x=>x.classList.remove('active'));
-  btn.classList.add('active');
-  selectedFilterGenre = btn.dataset.genre;
-  renderAll();
-});
+setupDynamicSubFilters();
 
 document.getElementById('t-start').onclick = tStart;
 document.getElementById('t-pause').onclick = tPause;
