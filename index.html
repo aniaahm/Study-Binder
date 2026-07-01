@@ -1007,17 +1007,20 @@ function renderAll(){
   }
 }
 
+// ==================== MAIN PAGE NAVIGATION TAB LISTENER ====================
 document.querySelectorAll('#tabs .tab').forEach(t => t.onclick = () => {
-  document.querySelectorAll('#tabs .tab').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('#tabs .tab').forEach(x => x.classList.remove('active'));
   t.classList.add('active');
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.getElementById('page-'+t.dataset.page).classList.add('active');
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  
+  const targetPage = document.getElementById('page-' + t.dataset.page);
+  if (targetPage) targetPage.classList.add('active');
+  
   if (t.dataset.page === 'requests' || t.dataset.page === 'study') fetchCloudData();
   renderAll();
 });
 
-setupDynamicSubFilters();
-// --- ALBUM MAIN & SUB FILTER COUPLING ---
+// ==================== ALBUM COUPLING & SUB-GENRES ====================
 function setupDynamicSubFilters() {
   const albumFilters = document.getElementById('album-filters');
   if (!albumFilters) return;
@@ -1046,12 +1049,16 @@ function setupDynamicSubFilters() {
   });
 }
 
-// Run the setup immediately
+// Run setups immediately
 setupDynamicSubFilters();
-document.getElementById('t-start').onclick = tStart;
-document.getElementById('t-pause').onclick = tPause;
-document.getElementById('t-reset').onclick = tReset;
-document.getElementById('userBrowseBtn').onclick = () => document.getElementById('user-photo-file').click();
+
+// ==================== GLOBAL INTERACTION BUTTONS ====================
+if (document.getElementById('t-start')) document.getElementById('t-start').onclick = tStart;
+if (document.getElementById('t-pause')) document.getElementById('t-pause').onclick = tPause;
+if (document.getElementById('t-reset')) document.getElementById('t-reset').onclick = tReset;
+if (document.getElementById('userBrowseBtn')) {
+  document.getElementById('userBrowseBtn').onclick = () => document.getElementById('user-photo-file').click();
+}
 document.getElementById('user-photo-file').onchange = (e) => {
   const f = e.target.files[0]; if(!f) return;
   const reader = new FileReader();
