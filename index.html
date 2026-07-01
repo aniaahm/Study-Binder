@@ -1017,7 +1017,7 @@ document.querySelectorAll('#tabs .tab').forEach(t => t.onclick = () => {
 });
 
 setupDynamicSubFilters();
-// --- SMART SUB-GENRE FILTERING SYSTEM ---
+// --- ALBUM MAIN & SUB FILTER COUPLING ---
 function setupDynamicSubFilters() {
   const albumFilters = document.getElementById('album-filters');
   if (!albumFilters) return;
