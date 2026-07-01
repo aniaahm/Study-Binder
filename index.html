@@ -229,23 +229,33 @@ img{user-select:none;-webkit-user-drag:none}
           <div class="form-group" style="margin-bottom:10px">
             <label style="font-size:11px;text-align:center">Optional Character/Set Name</label>
             <input type="text" id="user-card-name" placeholder="e.g. My Favorite Bias" style="padding:6px;border:2px solid var(--border);border-radius:8px;width:100%;text-align:center">
-          </div>
+         </div>
           <div class="form-group" style="margin-bottom:10px">
             <label style="font-size:11px;text-align:center">Genre Classification</label>
             <select id="user-card-genre" style="padding:6px;border:2px solid var(--border);border-radius:8px;width:100%;font-size:12px">
-              <option value="BL">BL / Shounen-ai</option>
-              <option value="GL">GL / Shoujo-ai</option>
-              <option value="K-pop">K-pop / k-dramas</option>
-              <option value="Anime">Anime / Manga</option>
+              <option value="BL">BL / yaoi</option>
+              <option value="GL">GL / yuri</option>
+              <option value="K-pop">K-pop</option>
+              <option value="K-drama">k-dramas</option>
+              <option value="T-pop">T-pop</option>
+              <option value="C-drama">C-dramas</option>
+              <option value="T-drama">T-dramas</option>
+              <option value="Anime">Anime</option>
+              <option value="comics">comics</option>
               <option value="Game">Game Characters</option>
               <option value="Other">Other</option>
             </select>
+          </div>
+
+          <div class="form-group" style="margin-bottom:10px">
+            <label style="font-size:11px;text-align:center">Sub-Genre (e.g. Specific Show / Band Name)</label>
+            <input type="text" id="user-card-subgenre" placeholder="e.g. MDZS, SKZ, JJK, Love in the Air" style="padding:6px;border:2px solid var(--border);border-radius:8px;width:100%;text-align:center">
           </div>
           <input type="file" id="user-photo-file" accept="image/*" style="display:none">
           <button class="btn" id="userBrowseBtn" style="font-size:13px;width:100%">📁 Load Local Graphic</button>
           
           <p style="font-size: 11px; color: var(--matcha-dark); opacity: 0.85; margin-top: 8px; text-align: center; font-style: italic;">
-              💡 It's totally okay if you don't want to upload your own custom photocards! The site has pre-ready official card drops waiting inside for you to pull.
+              💡 please upload your own custom photocards! The site is still add pre-ready official card drops waiting inside for you to pull.
           </p>
         </div>
       </div>
@@ -268,13 +278,17 @@ img{user-select:none;-webkit-user-drag:none}
             <div class="form-group">
               <label>Genre Branch Classification</label>
               <select id="adm-genre">
-                <option value="BL">BL / Shounen-ai</option>
-                <option value="GL">GL / Shoujo-ai</option>
-                <option value="Anime">Anime / Manga Characters</option>
-                <option value="K-pop">K-pop /kdramas</option>
-                <option value="T-pop">T-pop /Tdramas</option>
-                <option value="Game">Game Characters</option>
-                <option value="Other">Other Miscellaneous Fanbase</option>
+                 <option value="BL">BL / yaoi </option>
+              <option value="GL">GL / yuri </option>
+              <option value="K-pop">K-pop </option>
+               <option value="K-drama"> k-dramas</option>
+               <option value="T-pop">T-pop</option>
+               <option value="C-drama">C-dramas</option>
+               <option value="T-drama">T-dramas</option>
+              <option value="Anime">Anime</option>
+               <option value="comics">comics</option>
+              <option value="Game">Game Characters</option>
+              <option value="Other">Other</option>
               </select>
             </div>
           </div>
@@ -328,6 +342,10 @@ img{user-select:none;-webkit-user-drag:none}
         <button class="genre-btn" data-genre="Anime">Anime</button>
         <button class="genre-btn" data-genre="K-pop">K-pop</button>
         <button class="genre-btn" data-genre="T-pop">T-pop</button>
+        <button class="genre-btn" data-genre="k-drama">k-drama</button>
+        <button class="genre-btn" data-genre="c-drama">c-drama</button>
+        <button class="genre-btn" data-genre="T-drama">T-drama</button>
+        <button class="genre-btn" data-genre="comics">comics</button>
         <button class="genre-btn" data-genre="Game">Games</button>
         <button class="genre-btn" data-genre="Other">Other</button>
     </div>
@@ -527,6 +545,16 @@ function tDone(){
   const rarity = rollRarity();
   const titleField = document.getElementById('user-card-name') ? document.getElementById('user-card-name').value.trim() : '';
   const genreField = document.getElementById('user-card-genre') ? document.getElementById('user-card-genre').value : 'Other';
+  const subGenreField = document.getElementById('user-card-subgenre') ? document.getElementById('user-card-subgenre').value.trim() : 'all';
+  
+  let finalCardData = {
+    id: 'pc-' + Date.now(),
+    date: new Date().toLocaleDateString(),
+    rarity: rarity,
+    name: titleField || 'Staged Workspace Drop',
+    genre: genreField,
+    sub_genre: subGenreField || 'all'
+  };
   
   let finalCardData = {
     id: 'pc-' + Date.now(),
