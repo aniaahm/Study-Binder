@@ -986,7 +986,7 @@ function renderRequestsFeed() {
 }
 
 /* ============================================================
-   UI VIEW SYNCHRONIZATION
+   UI VIEW SYNCHRONIZATION & EVENT LISTENERS
 ============================================================ */
 function renderAll(){
   document.getElementById('s-level').textContent = S.level;
@@ -997,7 +997,14 @@ function renderAll(){
   document.getElementById('pool-count').textContent = cloudDropsCache.length;
 
   const grid = document.getElementById('collection-grid');
-  const filtered = S.userCards.filter(c => selectedFilterGenre === 'all' || c.genre === selectedFilterGenre);
+  
+  let filtered = S.userCards;
+  if (selectedFilterGenre !== 'all') {
+    filtered = filtered.filter(c => c.genre && c.genre.toLowerCase() === selectedFilterGenre.toLowerCase());
+  }
+  if (typeof selectedFilterSubGenre !== 'undefined' && selectedFilterSubGenre !== 'all') {
+    filtered = filtered.filter(c => c.sub_genre && c.sub_genre === selectedFilterSubGenre);
+  }
 
   if(filtered.length === 0){
     grid.innerHTML = `<div class="paper center muted" style="grid-column: 1/-1;padding:40px;">No cards found matching this filter branch yet.</div>`;
@@ -1007,20 +1014,20 @@ function renderAll(){
   }
 }
 
-// ==================== MAIN PAGE NAVIGATION TAB LISTENER ====================
+// Main Page View Navigation Router
 document.querySelectorAll('#tabs .tab').forEach(t => t.onclick = () => {
-  document.querySelectorAll('#tabs .tab').forEach(x => x.classList.remove('active'));
+  document.querySelectorAll('#tabs .tab').forEach(x=>x.classList.remove('active'));
   t.classList.add('active');
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   
-  const targetPage = document.getElementById('page-' + t.dataset.page);
+  const targetPage = document.getElementById('page-'+t.dataset.page);
   if (targetPage) targetPage.classList.add('active');
   
   if (t.dataset.page === 'requests' || t.dataset.page === 'study') fetchCloudData();
   renderAll();
 });
 
-// ==================== ALBUM COUPLING & SUB-GENRES ====================
+// --- SMART SUB-GENRE FILTERING SYSTEM ---
 function setupDynamicSubFilters() {
   const albumFilters = document.getElementById('album-filters');
   if (!albumFilters) return;
@@ -1049,16 +1056,12 @@ function setupDynamicSubFilters() {
   });
 }
 
-// Run setups immediately
+// Trigger Workspace Interactions
 setupDynamicSubFilters();
-
-// ==================== GLOBAL INTERACTION BUTTONS ====================
-if (document.getElementById('t-start')) document.getElementById('t-start').onclick = tStart;
-if (document.getElementById('t-pause')) document.getElementById('t-pause').onclick = tPause;
-if (document.getElementById('t-reset')) document.getElementById('t-reset').onclick = tReset;
-if (document.getElementById('userBrowseBtn')) {
-  document.getElementById('userBrowseBtn').onclick = () => document.getElementById('user-photo-file').click();
-}
+document.getElementById('t-start').onclick = tStart;
+document.getElementById('t-pause').onclick = tPause;
+document.getElementById('t-reset').onclick = tReset;
+document.getElementById('userBrowseBtn').onclick = () => document.getElementById('user-photo-file').click();
 document.getElementById('user-photo-file').onchange = (e) => {
   const f = e.target.files[0]; if(!f) return;
   const reader = new FileReader();
@@ -1086,22 +1089,19 @@ function toast(msg){
 }
 function escapeHtml(s){ return String(s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c])); }
 
-// Check if a user is logged in to hide the Auth Box
+// Authenticated session view filter handler
 if (supabaseClient) {
     supabaseClient.auth.getSession().then(({ data: { session } }) => {
         if (session) {
-            // Hide the login container if user exists
             const authBox = document.getElementById('authContainer');
             if (authBox) authBox.style.display = 'none';
         }
     });
 }
 
+// Application Runtime Initialization
 tDisplay();
 renderAll();
-if (typeof fetchCloudData === "function") {
-    fetchCloudData();
-}
 fetchCloudData();
 </script>
 </body>
