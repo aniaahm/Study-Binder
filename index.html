@@ -1017,7 +1017,36 @@ document.querySelectorAll('#tabs .tab').forEach(t => t.onclick = () => {
 });
 
 setupDynamicSubFilters();
+// --- SMART SUB-GENRE FILTERING SYSTEM ---
+function setupDynamicSubFilters() {
+  const albumFilters = document.getElementById('album-filters');
+  if (!albumFilters) return;
+  
+  let subContainer = document.getElementById('sub-genre-bar');
+  if (!subContainer) {
+    subContainer = document.createElement('div');
+    subContainer.id = 'sub-genre-bar';
+    subContainer.style.cssText = "display:none; gap:6px; flex-wrap:wrap; margin-top:10px; margin-bottom:20px; justify-content:center; padding:8px; background:rgba(255,183,213,0.15); border-radius:12px; border:1px dashed var(--sakura-pink); animation:fadein 0.25s ease;";
+    albumFilters.parentNode.insertBefore(subContainer, albumFilters.nextSibling);
+  }
 
+  albumFilters.querySelectorAll('.genre-btn').forEach(btn => {
+    btn.onclick = () => {
+      albumFilters.querySelectorAll('.genre-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      
+      selectedFilterGenre = btn.getAttribute('data-genre') || 'all';
+      selectedFilterSubGenre = 'all'; 
+
+      renderSubFilterRow(subContainer);
+      renderAll(); // 🌟 Keeps your main layout pages working perfectly!
+    };
+  });
+}
+
+// Turn it on!
+setupDynamicSubFilters();
+  
 document.getElementById('t-start').onclick = tStart;
 document.getElementById('t-pause').onclick = tPause;
 document.getElementById('t-reset').onclick = tReset;
