@@ -1038,15 +1038,16 @@ function setupDynamicSubFilters() {
       selectedFilterGenre = btn.getAttribute('data-genre') || 'all';
       selectedFilterSubGenre = 'all'; 
 
-      renderSubFilterRow(subContainer);
-      renderAll(); // 🌟 Keeps your main layout pages working perfectly!
+      if (typeof renderSubFilterRow === 'function') {
+        renderSubFilterRow(subContainer);
+      }
+      renderAll(); 
     };
   });
 }
 
-// Turn it on!
+// Run the setup immediately
 setupDynamicSubFilters();
-  
 document.getElementById('t-start').onclick = tStart;
 document.getElementById('t-pause').onclick = tPause;
 document.getElementById('t-reset').onclick = tReset;
