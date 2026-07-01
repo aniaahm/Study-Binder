@@ -170,7 +170,7 @@ img{user-select:none;-webkit-user-drag:none}
   </div>
 </nav>
 
-<main class="main">
+<nav class="main">
 
   <section class="page active" id="page-study">
     <header class="center" style="margin-bottom:30px">
@@ -342,8 +342,8 @@ img{user-select:none;-webkit-user-drag:none}
         <button class="genre-btn" data-genre="Anime">Anime</button>
         <button class="genre-btn" data-genre="K-pop">K-pop</button>
         <button class="genre-btn" data-genre="T-pop">T-pop</button>
-        <button class="genre-btn" data-genre="k-drama">k-drama</button>
-        <button class="genre-btn" data-genre="c-drama">c-drama</button>
+        <button class="genre-btn" data-genre="K-drama">K-drama</button>
+        <button class="genre-btn" data-genre="C-drama">C-drama</button>
         <button class="genre-btn" data-genre="T-drama">T-drama</button>
         <button class="genre-btn" data-genre="comics">comics</button>
         <button class="genre-btn" data-genre="Game">Games</button>
@@ -393,7 +393,7 @@ img{user-select:none;-webkit-user-drag:none}
     </div>
   </section>
 
-</main>
+</nav>
 
 <div class="overlay" id="overlay">
   <div class="modal" id="modal-body"></div>
@@ -485,7 +485,6 @@ function addXp(n){
     toast(`✦ Level Up! Reached Rank Level ${S.level}`);
   }
 }
-// Probability configuration tier loader
 function rollRarity(){
   let r = Math.random() * 100; let running = 0;
   for(const k of RARITY_ORDER){
@@ -555,14 +554,6 @@ function tDone(){
     genre: genreField,
     sub_genre: subGenreField || 'all'
   };
-  
-  let finalCardData = {
-    id: 'pc-' + Date.now(),
-    date: new Date().toLocaleDateString(),
-    rarity: rarity,
-    name: titleField || 'Staged Workspace Drop',
-    genre: genreField
-  };
 
   if(stagedPhoto){
     finalCardData.image = stagedPhoto.data;
@@ -595,6 +586,7 @@ function resetStagedArea(){
   stagedPhoto = null;
   if(document.getElementById('user-photo-file')) document.getElementById('user-photo-file').value = "";
   if(document.getElementById('user-card-name')) document.getElementById('user-card-name').value = "";
+  if(document.getElementById('user-card-subgenre')) document.getElementById('user-card-subgenre').value = "";
   if(document.getElementById('pre-empty-state')) document.getElementById('pre-empty-state').style.display = 'block';
   if(document.getElementById('pre-img-preview')) document.getElementById('pre-img-preview').style.display = 'none';
   if(document.getElementById('pre-lock-banner')) document.getElementById('pre-lock-banner').style.display = 'none';
@@ -637,7 +629,7 @@ function renderSubFilterRow(container) {
 
   const uniqueSubs = new Set();
   S.userCards.forEach(c => {
-    if (c.genre && c.genre.toLowerCase() === selectedFilterGenre.toLowerCase() && c.sub_genre && c.sub_genre !== 'All') {
+    if (c.genre && c.genre.toLowerCase() === selectedFilterGenre.toLowerCase() && c.sub_genre && c.sub_genre.toLowerCase() !== 'all') {
       uniqueSubs.add(c.sub_genre);
     }
   });
@@ -735,21 +727,13 @@ function renderCardTemplate(c){
 function deleteCardFromAlbum(cardId, cardName) {
     if (!confirm("Are you sure you want to delete this photocard from your binder?")) return;
 
-    const storageKeys = ['album', 'studyBinder_album', 'user_album', 'user_cards', 'cards'];
-    storageKeys.forEach(key => {
-        try {
-            let items = JSON.parse(localStorage.getItem(key));
-            if (Array.isArray(items)) {
-                items = items.filter(c => c && String(c.id) !== String(cardId));
-                localStorage.setItem(key, JSON.stringify(items));
-            }
-        } catch (e) {
-            console.error("Error clearing key " + key, e);
-        }
-    });
-
     S.userCards = S.userCards.filter(c => c && String(c.id) !== String(cardId));
     save();
+    
+    // Refresh sub-filter visibility setup instantly
+    const subContainer = document.getElementById('sub-genre-bar');
+    if (subContainer) renderSubFilterRow(subContainer);
+    
     toast("Card removed successfully!");
     renderAll();
 }
@@ -955,7 +939,7 @@ function renderAll(){
     filtered = filtered.filter(c => c.genre && c.genre.toLowerCase() === selectedFilterGenre.toLowerCase());
   }
   if (typeof selectedFilterSubGenre !== 'undefined' && selectedFilterSubGenre !== 'all') {
-    filtered = filtered.filter(c => c.sub_genre && c.sub_genre === selectedFilterSubGenre);
+    filtered = filtered.filter(c => c.sub_genre && c.sub_genre.toLowerCase() === selectedFilterSubGenre.toLowerCase());
   }
 
   if(filtered.length === 0){
@@ -974,6 +958,11 @@ document.querySelectorAll('#tabs .tab').forEach(t => t.onclick = () => {
   const targetPage = document.getElementById('page-'+t.dataset.page);
   if(targetPage) targetPage.classList.add('active');
   if (t.dataset.page === 'requests' || t.dataset.page === 'study') fetchCloudData();
+  
+  // Re-sync active sub-genres row layout state on view tab switches
+  const subContainer = document.getElementById('sub-genre-bar');
+  if (subContainer) renderSubFilterRow(subContainer);
+  
   renderAll();
 });
 
