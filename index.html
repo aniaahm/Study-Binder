@@ -584,7 +584,7 @@ function tStart(){
   if(mInput) mInput.disabled = true;
   timerInt = setInterval(()=>{
     timerSec--;
-    tDisplay(); // 
+    tDisplay(); // FIXED: Display updates to 00:00 first
     if(timerSec<=0){ tDone(); }
   },1000);
   if(stagedPhoto) {
@@ -597,46 +597,58 @@ function tReset(){ tPause(); updateTimerFromInput(); resetStagedArea(); }
 
 function tDone(){
   tPause();
-  const rarity = rollRarity();
-  const titleField = document.getElementById('user-card-name') ? document.getElementById('user-card-name').value.trim() : '';
-  const genreField = document.getElementById('user-card-genre') ? document.getElementById('user-card-genre').value : 'Other';
-  const subGenreField = document.getElementById('user-card-subgenre') ? document.getElementById('user-card-subgenre').value.trim() : 'all';
   
-  let finalCardData = {
-    id: 'pc-' + Date.now(),
-    date: new Date().toLocaleDateString(),
-    rarity: rarity,
-    name: titleField || 'Staged Workspace Drop',
-    genre: genreField,
-    sub_genre: subGenreField || 'all'
-  };
+  try {
+    const rarity = rollRarity();
+    const titleField = document.getElementById('user-card-name') ? document.getElementById('user-card-name').value.trim() : '';
+    const genreField = document.getElementById('user-card-genre') ? document.getElementById('user-card-genre').value : 'Other';
+    const subGenreField = document.getElementById('user-card-subgenre') ? document.getElementById('user-card-subgenre').value.trim() : 'all';
+    
+    let finalCardData = {
+      id: 'pc-' + Date.now(),
+      date: new Date().toLocaleDateString(),
+      rarity: rarity,
+      name: titleField || 'Staged Workspace Drop',
+      genre: genreField,
+      sub_genre: subGenreField || 'all'
+    };
 
-  if(stagedPhoto){
-    finalCardData.image = stagedPhoto.data;
-  } else if(cloudDropsCache.length > 0) {
-    let matches = cloudDropsCache.filter(item => item.rarity === rarity);
-    let randomTemplate = matches.length > 0 ? matches[Math.floor(Math.random() * matches.length)] : cloudDropsCache[Math.floor(Math.random() * cloudDropsCache.length)];
-    finalCardData.image = randomTemplate.image;
-    finalCardData.name = randomTemplate.name;
-    finalCardData.genre = randomTemplate.genre || 'Other';
-    if(randomTemplate.sub_genre) finalCardData.sub_genre = randomTemplate.sub_genre;
-  } else {
-    finalCardData.image = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23fff0f5"/><text x="50" y="55" font-family="sans-serif" font-size="8" text-anchor="middle" fill="%233a4f3a">Standard Drop</text></svg>';
+    if(stagedPhoto && stagedPhoto.data){
+      finalCardData.image = stagedPhoto.data;
+    } else if(Array.isArray(cloudDropsCache) && cloudDropsCache.length > 0) {
+      let matches = cloudDropsCache.filter(item => item.rarity === rarity);
+      let randomTemplate = matches.length > 0 ? matches[Math.floor(Math.random() * matches.length)] : cloudDropsCache[Math.floor(Math.random() * cloudDropsCache.length)];
+      finalCardData.image = randomTemplate.image;
+      finalCardData.name = randomTemplate.name || finalCardData.name;
+      finalCardData.genre = randomTemplate.genre || 'Other';
+      if(randomTemplate.sub_genre) finalCardData.sub_genre = randomTemplate.sub_genre;
+    } else {
+      finalCardData.image = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23fff0f5"/><text x="50" y="55" font-family="sans-serif" font-size="8" text-anchor="middle" fill="%233a4f3a">Standard Drop</text></svg>';
+    }
+
+    if (!S.userCards) S.userCards = [];
+    S.userCards.push(finalCardData);
+    
+    if (typeof addXp === 'function') {
+      addXp(RARITIES[rarity] ? RARITIES[rarity].xp : 10);
+    }
+
+    const today = new Date().toISOString().slice(0,10);
+    if (S.lastStudyDate !== today) {
+      const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0,10);
+      S.streak = (S.lastStudyDate === yesterday) ? (S.streak || 0) + 1 : 1;
+      S.lastStudyDate = today;
+    }
+
+    save();
+    triggerReveal(finalCardData);
+    resetStagedArea();
+    renderAll();
+
+  } catch (err) {
+    console.error("Error in tDone():", err);
+    alert("Timer finished!");
   }
-
-  S.userCards.push(finalCardData);
-  addXp(RARITIES[rarity].xp);
-
-  const today = new Date().toISOString().slice(0,10);
-  if (S.lastStudyDate !== today) {
-    S.streak = (S.lastStudyDate === new Date(Date.now()-86400000).toISOString().slice(0,10)) ? S.streak + 1 : 1;
-    S.lastStudyDate = today;
-  }
-
-  save();
-  triggerReveal(finalCardData);
-  resetStagedArea();
-  renderAll();
 }
 
 function resetStagedArea(){
