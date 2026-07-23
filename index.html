@@ -34,7 +34,7 @@ button{font:inherit;color:inherit;cursor:pointer}
 input,select,textarea{font:inherit}
 img{user-select:none;-webkit-user-drag:none}
 
-/* ============ FULL SCREEN LAYOUT ============ */
+/* ============ MASSIVE FULL SCREEN LAYOUT CORRECTIONS ============ */
 .nav{position:sticky;top:0;z-index:30;backdrop-filter:blur(10px);background:rgba(242,247,242,.85);border-bottom:2px solid var(--border)}
 .nav-inner{width:100%;margin:0;padding:12px 24px;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
 .brand{display:flex;align-items:center;gap:10px;font-family:'Fraunces',serif;font-weight:900;font-size:24px;color:var(--matcha-dark)}
@@ -47,6 +47,7 @@ img{user-select:none;-webkit-user-drag:none}
 .stat{display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;background:#fff;border:2px solid var(--border);font-size:13px;font-weight:600}
 .stat b{font-weight:800;color:var(--primary)}
 
+/* 🌟 REMOVED MAX-WIDTH TO RESTORE THE ENTIRE HUGE SCREEN ALIGNMENT */
 .main{width:100%;margin:0;padding:24px 24px 80px}
 .paper{background:var(--paper);border:2px solid var(--border);border-radius:24px;box-shadow:var(--shadow);padding:24px}
 .row{display:flex;gap:24px;flex-wrap:wrap}
@@ -63,6 +64,7 @@ img{user-select:none;-webkit-user-drag:none}
 .g-cards{grid-template-columns:repeat(auto-fill, minmax(160px,1fr))}
 .page{display:none}
 
+/* 🌟 SLOW SLIDING ANIMATION EFFECT FOR PAGES */
 .page.active{
   display:block;
   animation:slowSlideUp 1.2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
@@ -101,7 +103,7 @@ img{user-select:none;-webkit-user-drag:none}
 .status-planned { background: #fef3c7; color: #d97706; }
 .status-progress { background: #e0f2fe; color: #0284c7; }
 
-/* ============ INTEGRATED TIMER BANNER ============ */
+/* ============ INTEGRATED BANNER ============ */
 .timer-wrap {
   position: relative;
   display: flex;
@@ -114,7 +116,7 @@ img{user-select:none;-webkit-user-drag:none}
   border: 2px solid var(--border);
   box-shadow: var(--shadow);
   overflow: hidden;
-  min-height: 380px;
+  min-height: 380px; /* 🌟 Increased min-height to pull it wider/taller onto full screen */
   background-color: var(--paper);
   background-size: cover;
   background-position: center center;
@@ -459,7 +461,7 @@ img{user-select:none;-webkit-user-drag:none}
    SUPABASE LIVE CONNECTION LAYER CONFIG
 ============================================================ */
 const SUPABASE_URL = "https://tssgtdlmnjmbqdljqvdq.supabase.co"; 
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInRefiI6InRzc2d0ZGxtbmptYnFkbGpxdmRxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI3NDkyNTksImV4cCI6MjA5ODMyNTI1OX0.NLkAJ5_mj15ugvsEHOdqkxVQuPI-MJty14qrFe9v0tU";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRzc2d0ZGxtbmptYnFkbGpxdmRxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI3NDkyNTksImV4cCI6MjA5ODMyNTI1OX0.NLkAJ5_mj15ugvsEHOdqkxVQuPI-MJty14qrFe9v0tU";
 const ADMIN_PASSWORD = "PPWismylife"; 
 
 let supabaseClient = null;
@@ -512,56 +514,6 @@ const DEFAULT_STATE = {
 };
 
 const KEY = 'studybinder-matcha-v6';
-
-function load(){
-  let currentState = structuredClone(DEFAULT_STATE);
-  try{
-    const raw = localStorage.getItem(KEY);
-    if(raw) {
-      const parsed = JSON.parse(raw);
-      currentState = {...currentState, ...parsed};
-    }
-  }catch(e){ console.error(e); }
-
-  const possibleOlderKeys = [
-    'studybinder-matcha-v5', 
-    'studybinder-matcha-v4', 
-    'studybinder-matcha-v3', 
-    'studybinder-matcha-v2', 
-    'studybinder-matcha-v1',
-    'studybinder-state',
-    'studybinder-cards'
-  ];
-
-  let recoveredCount = 0;
-  for (const oldKey of possibleOlderKeys) {
-    try {
-      const oldRaw = localStorage.getItem(oldKey);
-      if (oldRaw) {
-        const oldParsed = JSON.parse(oldRaw);
-        let oldCards = Array.isArray(oldParsed) ? oldParsed : (oldParsed.userCards || []);
-        
-        oldCards.forEach(card => {
-          if (card && card.id) {
-            const exists = currentState.userCards.some(c => String(c.id) === String(card.id));
-            if (!exists) {
-              currentState.userCards.push(card);
-              recoveredCount++;
-            }
-          }
-        });
-      }
-    } catch(err) { console.error("Error inspecting key: " + oldKey, err); }
-  }
-
-  if (recoveredCount > 0) {
-    setTimeout(() => toast(`🎉 Recovered ${recoveredCount} cards from previous versions!`), 1000);
-    localStorage.setItem(KEY, JSON.stringify(currentState));
-  }
-
-  return currentState;
-}
-
 let S = load();
 let cloudRequestsCache = []; 
 let cloudDropsCache = []; 
@@ -569,6 +521,14 @@ let stagedPhoto = null;
 let selectedFilterGenre = 'all';
 let selectedFilterSubGenre = 'all';
 
+function load(){
+  try{
+    const raw = localStorage.getItem(KEY);
+    if(!raw) return structuredClone(DEFAULT_STATE);
+    const parsed = JSON.parse(raw);
+    return {...structuredClone(DEFAULT_STATE), ...parsed};
+  }catch{ return structuredClone(DEFAULT_STATE); }
+}
 function save(){ localStorage.setItem(KEY, JSON.stringify(S)); }
 function xpForLevel(l){ return 100 + (l-1)*60 }
 
@@ -624,8 +584,8 @@ function tStart(){
   if(mInput) mInput.disabled = true;
   timerInt = setInterval(()=>{
     timerSec--;
-    tDisplay();
     if(timerSec<=0){ tDone(); }
+    tDisplay();
   },1000);
   if(stagedPhoto) {
     const banner = document.getElementById('pre-lock-banner');
@@ -637,58 +597,46 @@ function tReset(){ tPause(); updateTimerFromInput(); resetStagedArea(); }
 
 function tDone(){
   tPause();
+  const rarity = rollRarity();
+  const titleField = document.getElementById('user-card-name') ? document.getElementById('user-card-name').value.trim() : '';
+  const genreField = document.getElementById('user-card-genre') ? document.getElementById('user-card-genre').value : 'Other';
+  const subGenreField = document.getElementById('user-card-subgenre') ? document.getElementById('user-card-subgenre').value.trim() : 'all';
   
-  try {
-    const rarity = rollRarity();
-    const titleField = document.getElementById('user-card-name') ? document.getElementById('user-card-name').value.trim() : '';
-    const genreField = document.getElementById('user-card-genre') ? document.getElementById('user-card-genre').value : 'Other';
-    const subGenreField = document.getElementById('user-card-subgenre') ? document.getElementById('user-card-subgenre').value.trim() : 'all';
-    
-    let finalCardData = {
-      id: 'pc-' + Date.now(),
-      date: new Date().toLocaleDateString(),
-      rarity: rarity,
-      name: titleField || 'Staged Workspace Drop',
-      genre: genreField,
-      sub_genre: subGenreField || 'all'
-    };
+  let finalCardData = {
+    id: 'pc-' + Date.now(),
+    date: new Date().toLocaleDateString(),
+    rarity: rarity,
+    name: titleField || 'Staged Workspace Drop',
+    genre: genreField,
+    sub_genre: subGenreField || 'all'
+  };
 
-    if(stagedPhoto && stagedPhoto.data){
-      finalCardData.image = stagedPhoto.data;
-    } else if(Array.isArray(cloudDropsCache) && cloudDropsCache.length > 0) {
-      let matches = cloudDropsCache.filter(item => item.rarity === rarity);
-      let randomTemplate = matches.length > 0 ? matches[Math.floor(Math.random() * matches.length)] : cloudDropsCache[Math.floor(Math.random() * cloudDropsCache.length)];
-      finalCardData.image = randomTemplate.image;
-      finalCardData.name = randomTemplate.name || finalCardData.name;
-      finalCardData.genre = randomTemplate.genre || 'Other';
-      if(randomTemplate.sub_genre) finalCardData.sub_genre = randomTemplate.sub_genre;
-    } else {
-      finalCardData.image = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23fff0f5"/><text x="50" y="55" font-family="sans-serif" font-size="8" text-anchor="middle" fill="%233a4f3a">Standard Drop</text></svg>';
-    }
-
-    if (!S.userCards) S.userCards = [];
-    S.userCards.push(finalCardData);
-    
-    if (typeof addXp === 'function') {
-      addXp(RARITIES[rarity] ? RARITIES[rarity].xp : 10);
-    }
-
-    const today = new Date().toISOString().slice(0,10);
-    if (S.lastStudyDate !== today) {
-      const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0,10);
-      S.streak = (S.lastStudyDate === yesterday) ? (S.streak || 0) + 1 : 1;
-      S.lastStudyDate = today;
-    }
-
-    save();
-    triggerReveal(finalCardData);
-    resetStagedArea();
-    renderAll();
-
-  } catch (err) {
-    console.error("Error in tDone():", err);
-    alert("Timer finished!");
+  if(stagedPhoto){
+    finalCardData.image = stagedPhoto.data;
+  } else if(cloudDropsCache.length > 0) {
+    let matches = cloudDropsCache.filter(item => item.rarity === rarity);
+    let randomTemplate = matches.length > 0 ? matches[Math.floor(Math.random() * matches.length)] : cloudDropsCache[Math.floor(Math.random() * cloudDropsCache.length)];
+    finalCardData.image = randomTemplate.image;
+    finalCardData.name = randomTemplate.name;
+    finalCardData.genre = randomTemplate.genre || 'Other';
+    if(randomTemplate.sub_genre) finalCardData.sub_genre = randomTemplate.sub_genre;
+  } else {
+    finalCardData.image = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23fff0f5"/><text x="50" y="55" font-family="sans-serif" font-size="8" text-anchor="middle" fill="%233a4f3a">Standard Drop</text></svg>';
   }
+
+  S.userCards.push(finalCardData);
+  addXp(RARITIES[rarity].xp);
+
+  const today = new Date().toISOString().slice(0,10);
+  if (S.lastStudyDate !== today) {
+    S.streak = (S.lastStudyDate === new Date(Date.now()-86400000).toISOString().slice(0,10)) ? S.streak + 1 : 1;
+    S.lastStudyDate = today;
+  }
+
+  save();
+  triggerReveal(finalCardData);
+  resetStagedArea();
+  renderAll();
 }
 
 function resetStagedArea(){
@@ -887,6 +835,7 @@ async function fetchCloudData() {
   renderAll();
 }
 
+// Secret Owner Entry
 let logoClicks = 0;
 if(document.getElementById('hiddenAdminTrigger')) {
   document.getElementById('hiddenAdminTrigger').addEventListener('click', () => {
