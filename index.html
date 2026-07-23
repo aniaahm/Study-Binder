@@ -34,10 +34,10 @@ button{font:inherit;color:inherit;cursor:pointer}
 input,select,textarea{font:inherit}
 img{user-select:none;-webkit-user-drag:none}
 
-/* ============ MASSIVE FULL SCREEN LAYOUT CORRECTIONS ============ */
+/* ============ FULL SCREEN LAYOUT ============ */
 .nav{position:sticky;top:0;z-index:30;backdrop-filter:blur(10px);background:rgba(242,247,242,.85);border-bottom:2px solid var(--border)}
 .nav-inner{width:100%;margin:0;padding:12px 24px;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
-.brand{display:flex;align-items:center;gap:10px;font-family:'Fraunces',serif;font-weight:900;font-size:24px;color:var(--matcha-dark)}
+.brand{display:flex;align-items:center;gap:10px;font-family:'Fraunces',serif;font-weight:900;font-size:24px;color:var(--matcha-dark);cursor:pointer}
 .brand img{height:38px;width:auto;object-fit:contain}
 .brand span{color:var(--primary)}
 .tabs{display:flex;gap:6px;flex-wrap:wrap;margin-left:8px}
@@ -47,7 +47,6 @@ img{user-select:none;-webkit-user-drag:none}
 .stat{display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;background:#fff;border:2px solid var(--border);font-size:13px;font-weight:600}
 .stat b{font-weight:800;color:var(--primary)}
 
-/* 🌟 REMOVED MAX-WIDTH TO RESTORE THE ENTIRE HUGE SCREEN ALIGNMENT */
 .main{width:100%;margin:0;padding:24px 24px 80px}
 .paper{background:var(--paper);border:2px solid var(--border);border-radius:24px;box-shadow:var(--shadow);padding:24px}
 .row{display:flex;gap:24px;flex-wrap:wrap}
@@ -64,7 +63,6 @@ img{user-select:none;-webkit-user-drag:none}
 .g-cards{grid-template-columns:repeat(auto-fill, minmax(160px,1fr))}
 .page{display:none}
 
-/* 🌟 SLOW SLIDING ANIMATION EFFECT FOR PAGES */
 .page.active{
   display:block;
   animation:slowSlideUp 1.2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
@@ -103,7 +101,7 @@ img{user-select:none;-webkit-user-drag:none}
 .status-planned { background: #fef3c7; color: #d97706; }
 .status-progress { background: #e0f2fe; color: #0284c7; }
 
-/* ============ INTEGRATED BANNER ============ */
+/* ============ INTEGRATED TIMER BANNER ============ */
 .timer-wrap {
   position: relative;
   display: flex;
@@ -116,7 +114,7 @@ img{user-select:none;-webkit-user-drag:none}
   border: 2px solid var(--border);
   box-shadow: var(--shadow);
   overflow: hidden;
-  min-height: 380px; /* 🌟 Increased min-height to pull it wider/taller onto full screen */
+  min-height: 380px;
   background-color: var(--paper);
   background-size: cover;
   background-position: center center;
@@ -149,22 +147,23 @@ img{user-select:none;-webkit-user-drag:none}
 .custom-time-box input{width:70px;padding:6px;border-radius:8px;border:2px solid var(--border);text-align:center;font-weight:700;color:var(--matcha-dark);background:#fff}
 
 /* ============ PHOTOCARDS ============ */
-.card{position:relative;border-radius:18px;aspect-ratio:5/7;perspective:1200px;cursor:pointer}
+.card{position:relative;border-radius:18px;aspect-ratio:5/7;perspective:1200px;cursor:pointer;width:100%;height:100%}
 .card .inner{position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform .5s cubic-bezier(.2,.8,.2,1)}
 .card.flipped .inner{transform:rotateY(180deg)}
 .card .face{position:absolute;inset:0;border-radius:18px;overflow:hidden;backface-visibility:hidden;border:4px solid var(--common);box-shadow:0 8px 20px rgba(58,79,58,.12)}
+.card .face.front{background:#222;}
 .card .face.back{transform:rotateY(180deg);background:var(--sakura-light);padding:16px;display:flex;flex-direction:column;justify-content:space-between;color:var(--matcha-dark)}
 .card .face img{width:100%;height:100%;object-fit:cover;display:block}
-.card .genre-tag{position:absolute;top:8px;right:8px;background:rgba(255,255,255,0.9);padding:2px 6px;border-radius:6px;font-size:10px;font-weight:700;color:var(--matcha-dark);border:1px solid var(--border)}
-.card .num{position:absolute;top:8px;left:8px;background:rgba(255,255,255,.9);border-radius:6px;padding:2px 6px;font-size:10px;font-weight:800}
-.card .name{position:absolute;left:0;right:0;bottom:0;padding:10px;color:#fff;background:linear-gradient(transparent, rgba(0,0,0,.75));display:flex;flex-direction:column;gap:2px;align-items:start}
+.card .genre-tag{position:absolute;top:8px;right:8px;background:rgba(255,255,255,0.9);padding:2px 6px;border-radius:6px;font-size:10px;font-weight:700;color:var(--matcha-dark);border:1px solid var(--border);z-index:2}
+.card .num{position:absolute;top:8px;left:8px;background:rgba(255,255,255,.9);border-radius:6px;padding:2px 6px;font-size:10px;font-weight:800;z-index:2}
+.card .name{position:absolute;left:0;right:0;bottom:0;padding:10px;color:#fff;background:linear-gradient(transparent, rgba(0,0,0,.85));display:flex;flex-direction:column;gap:2px;align-items:start;z-index:2}
 .card .name b{font-family:'Fraunces',serif;font-size:13px;line-height:1.2}
 .card.r-common .face{border-color:var(--common)}
 .card.r-rare .face{border-color:var(--rare)}
 .card.r-epic .face{border-color:var(--epic)}
 .card.r-legendary .face{border-color:var(--legendary)}
 .card.r-secret .face{border-color:var(--secret)}
-.card .fx{position:absolute;inset:0;pointer-events:none;mix-blend-mode:overlay;opacity:0}
+.card .fx{position:absolute;inset:0;pointer-events:none;mix-blend-mode:overlay;opacity:0;z-index:1}
 .card.r-rare .fx{opacity:.5;background:radial-gradient(circle at 30% 30%, #fff8 0 2px, transparent 3px) 0 0/20px 20px}
 .card.r-epic .fx{opacity:.8;background:linear-gradient(115deg, transparent 30%, rgba(255,255,255,.6) 50%, transparent 70%);background-size:300% 300%;animation:shimmer 3s linear infinite}
 .card.r-legendary .fx, .card.r-secret .fx{opacity:.9;background:conic-gradient(from 0deg, #ff79c6,#ffd166,#06d6a0,#118ab2,#ef476f,#ff79c6);animation:spin 6s linear infinite}
@@ -175,10 +174,10 @@ img{user-select:none;-webkit-user-drag:none}
 .pre-card-box img{width:100%;height:100%;object-fit:cover}
 .pre-card-box .lock-overlay{position:absolute;inset:0;background:rgba(58,79,58,0.75);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:600}
 
-.bigcard{width:min(80vw,280px);aspect-ratio:5/7;margin:0 auto}
-.overlay{position:fixed;inset:0;background:rgba(58,79,58,.6);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;z-index:50;padding:20px}
+.bigcard{width:min(80vw,260px);aspect-ratio:5/7;margin:0 auto 16px auto}
+.overlay{position:fixed;inset:0;background:rgba(58,79,58,.6);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;z-index:999;padding:20px}
 .overlay.open{display:flex;animation:fadein .25s}
-.modal{max-width:500px;width:100%;text-align:center;color:var(--matcha-dark);background:#fff;padding:24px;border-radius:28px;border:2px solid var(--border)}
+.modal{max-width:480px;width:100%;text-align:center;color:var(--matcha-dark);background:#fff;padding:24px;border-radius:28px;border:2px solid var(--border);box-shadow: 0 10px 30px rgba(0,0,0,0.2)}
 
 .admin-box{
   margin-top:30px;
@@ -190,9 +189,10 @@ img{user-select:none;-webkit-user-drag:none}
 .form-group label{display:block;font-size:12px;font-weight:700;margin-bottom:4px}
 .form-group input, .form-group select{width:100%;padding:8px 12px;border-radius:8px;border:2px solid var(--border)}
 
-.toasts{position:fixed;right:18px;bottom:18px;z-index:80;display:flex;flex-direction:column;gap:8px}
+.toasts{position:fixed;right:18px;bottom:18px;z-index:1000;display:flex;flex-direction:column;gap:8px}
 .toast{background:var(--matcha-dark);color:#fff;padding:10px 16px;border-radius:12px;font-size:13px;box-shadow:var(--shadow);animation:slidein .25s}
 @keyframes slidein{from{transform:translateX(20px);opacity:0}to{transform:none;opacity:1}}
+@keyframes fadein{from{opacity:0}to{opacity:1}}
 </style>
 </head>
 <body>
@@ -379,17 +379,6 @@ img{user-select:none;-webkit-user-drag:none}
       <p class="muted">Flip completed memory card chips to read chronological progress history records.</p>
     </header>
 
-    <div id="authContainer" style="max-width: 400px; margin: 0 auto 30px auto; padding: 20px; background: #fff; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: center;">
-        <h3 style="font-family: Fraunces; color: var(--matcha-dark); margin-top:0;">Access Your Binder Account</h3>
-        <input type="email" id="authEmail" placeholder="Enter email address" style="width: 100%; padding: 10px; margin: 8px 0; border: 1px solid var(--border); border-radius: 6px; outline:none;">
-        <input type="password" id="authPassword" placeholder="Enter account password" style="width: 100%; padding: 10px; margin: 8px 0; border: 1px solid var(--border); border-radius: 6px; outline:none;">
-        
-        <div style="display: flex; gap: 10px; margin-top: 10px;">
-            <button onclick="handleUserSignUp()" class="btn" style="flex: 1; background: #e2e8f0; color: #334155; font-size:13px;">Sign Up</button>
-            <button onclick="handleUserLogin()" class="btn primary" style="flex: 1; font-size:13px;">Log In</button>
-        </div>
-    </div>
-
     <div class="genre-bar" id="album-filters">
         <button class="genre-btn active" data-genre="all">Show All Branches</button>
         <button class="genre-btn" data-genre="BL">BL</button>
@@ -461,38 +450,12 @@ img{user-select:none;-webkit-user-drag:none}
    SUPABASE LIVE CONNECTION LAYER CONFIG
 ============================================================ */
 const SUPABASE_URL = "https://tssgtdlmnjmbqdljqvdq.supabase.co"; 
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRzc2d0ZGxtbmptYnFkbGpxdmRxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI3NDkyNTksImV4cCI6MjA5ODMyNTI1OX0.NLkAJ5_mj15ugvsEHOdqkxVQuPI-MJty14qrFe9v0tU";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInRefiI6InRzc2d0ZGxtbmptYnFkbGpxdmRxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI3NDkyNTksImV4cCI6MjA5ODMyNTI1OX0.NLkAJ5_mj15ugvsEHOdqkxVQuPI-MJty14qrFe9v0tU";
 const ADMIN_PASSWORD = "PPWismylife"; 
 
 let supabaseClient = null;
 if (SUPABASE_URL !== "YOUR_SUPABASE_URL" && SUPABASE_ANON_KEY !== "YOUR_SUPABASE_ANON_KEY") {
   supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-}
-
-// ACCOUNT AUTHENTICATION CALLS
-async function handleUserSignUp() {
-    const email = document.getElementById('authEmail').value;
-    const password = document.getElementById('authPassword').value;
-    if(!email || !password) return alert("Please fill in all email and password fields.");
-    if (!supabaseClient) return alert("Supabase configuration setup is missing!");
-
-    const { data, error } = await supabaseClient.auth.signUp({ email, password });
-    if (error) alert("Sign up failure: " + error.message);
-    else alert("Registration check! Please review your mailbox confirmation link verification message.");
-}
-
-async function handleUserLogin() {
-    const email = document.getElementById('authEmail').value;
-    const password = document.getElementById('authPassword').value;
-    if(!email || !password) return alert("Please fill in all email and password fields.");
-    if (!supabaseClient) return alert("Supabase configuration setup is missing!");
-
-    const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-    if (error) alert("Login failure: " + error.message);
-    else {
-        alert("Logged in successfully!");
-        location.reload();
-    }
 }
 
 /* =======================================================
@@ -514,6 +477,56 @@ const DEFAULT_STATE = {
 };
 
 const KEY = 'studybinder-matcha-v6';
+
+function load(){
+  let currentState = structuredClone(DEFAULT_STATE);
+  try{
+    const raw = localStorage.getItem(KEY);
+    if(raw) {
+      const parsed = JSON.parse(raw);
+      currentState = {...currentState, ...parsed};
+    }
+  }catch(e){ console.error(e); }
+
+  const possibleOlderKeys = [
+    'studybinder-matcha-v5', 
+    'studybinder-matcha-v4', 
+    'studybinder-matcha-v3', 
+    'studybinder-matcha-v2', 
+    'studybinder-matcha-v1',
+    'studybinder-state',
+    'studybinder-cards'
+  ];
+
+  let recoveredCount = 0;
+  for (const oldKey of possibleOlderKeys) {
+    try {
+      const oldRaw = localStorage.getItem(oldKey);
+      if (oldRaw) {
+        const oldParsed = JSON.parse(oldRaw);
+        let oldCards = Array.isArray(oldParsed) ? oldParsed : (oldParsed.userCards || []);
+        
+        oldCards.forEach(card => {
+          if (card && card.id) {
+            const exists = currentState.userCards.some(c => String(c.id) === String(card.id));
+            if (!exists) {
+              currentState.userCards.push(card);
+              recoveredCount++;
+            }
+          }
+        });
+      }
+    } catch(err) { console.error("Error inspecting key: " + oldKey, err); }
+  }
+
+  if (recoveredCount > 0) {
+    setTimeout(() => toast(`🎉 Recovered ${recoveredCount} cards from previous versions!`), 1000);
+    localStorage.setItem(KEY, JSON.stringify(currentState));
+  }
+
+  return currentState;
+}
+
 let S = load();
 let cloudRequestsCache = []; 
 let cloudDropsCache = []; 
@@ -521,14 +534,6 @@ let stagedPhoto = null;
 let selectedFilterGenre = 'all';
 let selectedFilterSubGenre = 'all';
 
-function load(){
-  try{
-    const raw = localStorage.getItem(KEY);
-    if(!raw) return structuredClone(DEFAULT_STATE);
-    const parsed = JSON.parse(raw);
-    return {...structuredClone(DEFAULT_STATE), ...parsed};
-  }catch{ return structuredClone(DEFAULT_STATE); }
-}
 function save(){ localStorage.setItem(KEY, JSON.stringify(S)); }
 function xpForLevel(l){ return 100 + (l-1)*60 }
 
@@ -584,8 +589,8 @@ function tStart(){
   if(mInput) mInput.disabled = true;
   timerInt = setInterval(()=>{
     timerSec--;
-    if(timerSec<=0){ tDone(); }
     tDisplay();
+    if(timerSec<=0){ tDone(); }
   },1000);
   if(stagedPhoto) {
     const banner = document.getElementById('pre-lock-banner');
@@ -597,46 +602,60 @@ function tReset(){ tPause(); updateTimerFromInput(); resetStagedArea(); }
 
 function tDone(){
   tPause();
-  const rarity = rollRarity();
-  const titleField = document.getElementById('user-card-name') ? document.getElementById('user-card-name').value.trim() : '';
-  const genreField = document.getElementById('user-card-genre') ? document.getElementById('user-card-genre').value : 'Other';
-  const subGenreField = document.getElementById('user-card-subgenre') ? document.getElementById('user-card-subgenre').value.trim() : 'all';
   
-  let finalCardData = {
-    id: 'pc-' + Date.now(),
-    date: new Date().toLocaleDateString(),
-    rarity: rarity,
-    name: titleField || 'Staged Workspace Drop',
-    genre: genreField,
-    sub_genre: subGenreField || 'all'
-  };
+  try {
+    const rarity = rollRarity();
+    const titleField = document.getElementById('user-card-name') ? document.getElementById('user-card-name').value.trim() : '';
+    const genreField = document.getElementById('user-card-genre') ? document.getElementById('user-card-genre').value : 'Other';
+    const subGenreField = document.getElementById('user-card-subgenre') ? document.getElementById('user-card-subgenre').value.trim() : 'all';
+    
+    let defaultFallbackImg = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="280" viewBox="0 0 200 280"><rect width="200" height="280" fill="%23fff0f5"/><text x="100" y="140" font-family="sans-serif" font-weight="bold" font-size="14" text-anchor="middle" fill="%233a4f3a">✦ Study Completed!</text></svg>';
 
-  if(stagedPhoto){
-    finalCardData.image = stagedPhoto.data;
-  } else if(cloudDropsCache.length > 0) {
-    let matches = cloudDropsCache.filter(item => item.rarity === rarity);
-    let randomTemplate = matches.length > 0 ? matches[Math.floor(Math.random() * matches.length)] : cloudDropsCache[Math.floor(Math.random() * cloudDropsCache.length)];
-    finalCardData.image = randomTemplate.image;
-    finalCardData.name = randomTemplate.name;
-    finalCardData.genre = randomTemplate.genre || 'Other';
-    if(randomTemplate.sub_genre) finalCardData.sub_genre = randomTemplate.sub_genre;
-  } else {
-    finalCardData.image = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23fff0f5"/><text x="50" y="55" font-family="sans-serif" font-size="8" text-anchor="middle" fill="%233a4f3a">Standard Drop</text></svg>';
+    let finalCardData = {
+      id: 'pc-' + Date.now(),
+      date: new Date().toLocaleDateString(),
+      rarity: rarity,
+      name: titleField || 'Staged Workspace Drop',
+      genre: genreField,
+      sub_genre: subGenreField || 'all'
+    };
+
+    if(stagedPhoto && stagedPhoto.data){
+      finalCardData.image = stagedPhoto.data;
+    } else if(Array.isArray(cloudDropsCache) && cloudDropsCache.length > 0) {
+      let matches = cloudDropsCache.filter(item => item.rarity === rarity);
+      let randomTemplate = matches.length > 0 ? matches[Math.floor(Math.random() * matches.length)] : cloudDropsCache[Math.floor(Math.random() * cloudDropsCache.length)];
+      finalCardData.image = randomTemplate.image || defaultFallbackImg;
+      finalCardData.name = titleField || randomTemplate.name || finalCardData.name;
+      finalCardData.genre = randomTemplate.genre || genreField || 'Other';
+      if(randomTemplate.sub_genre) finalCardData.sub_genre = randomTemplate.sub_genre;
+    } else {
+      finalCardData.image = defaultFallbackImg;
+    }
+
+    if (!S.userCards) S.userCards = [];
+    S.userCards.push(finalCardData);
+    
+    if (typeof addXp === 'function') {
+      addXp(RARITIES[rarity] ? RARITIES[rarity].xp : 10);
+    }
+
+    const today = new Date().toISOString().slice(0,10);
+    if (S.lastStudyDate !== today) {
+      const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0,10);
+      S.streak = (S.lastStudyDate === yesterday) ? (S.streak || 0) + 1 : 1;
+      S.lastStudyDate = today;
+    }
+
+    save();
+    triggerReveal(finalCardData);
+    resetStagedArea();
+    renderAll();
+
+  } catch (err) {
+    console.error("Error in tDone():", err);
+    alert("Timer finished! Great job!");
   }
-
-  S.userCards.push(finalCardData);
-  addXp(RARITIES[rarity].xp);
-
-  const today = new Date().toISOString().slice(0,10);
-  if (S.lastStudyDate !== today) {
-    S.streak = (S.lastStudyDate === new Date(Date.now()-86400000).toISOString().slice(0,10)) ? S.streak + 1 : 1;
-    S.lastStudyDate = today;
-  }
-
-  save();
-  triggerReveal(finalCardData);
-  resetStagedArea();
-  renderAll();
 }
 
 function resetStagedArea(){
@@ -729,21 +748,25 @@ function triggerReveal(card){
   const overlay = document.getElementById('overlay');
   const modal = document.getElementById('modal-body');
   if(!overlay || !modal) return;
-  overlay.className = "overlay open";
   
   modal.innerHTML = `
-    <div style="display:flex;flex-direction:column;align-items:center;gap:18px">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:14px">
       <h2 style="font-family:Fraunces;margin:0;color:var(--matcha-dark)">✦ Drop Unlocked!</h2>
       <div class="bigcard">${renderCardTemplate(card)}</div>
       <div>
-        <h3 style="margin:4px 0">${card.name}</h3>
-        <span class="genre-badge">${card.genre}</span>
+        <h3 style="margin:4px 0">${escapeHtml(card.name)}</h3>
+        <span class="genre-badge">${escapeHtml(card.genre)}</span>
       </div>
-      <button class="btn primary" id="closeRevealBtn" style="width:100%">Add To Album</button>
+      <button class="btn primary" id="closeRevealBtn" style="width:100%; margin-top:8px;">Add To Album</button>
     </div>
   `;
+  
+  overlay.classList.add('open');
   bindCardInteractions(modal);
-  document.getElementById('closeRevealBtn').onclick = () => { overlay.className = "overlay"; };
+  
+  document.getElementById('closeRevealBtn').onclick = () => { 
+    overlay.classList.remove('open'); 
+  };
 }
 
 function renderCardTemplate(c){
@@ -757,17 +780,17 @@ function renderCardTemplate(c){
     <div class="card r-${rarityKey}" data-id="${cardIdStr}">
         <div class="inner">
             <div class="face front">
-                <img src="${c.image || ''}">
+                <img src="${c.image || ''}" alt="${cleanName}">
                 <div class="fx"></div>
-                <div class="num">✦ ${c.date || '6/30/2026'}</div>
-                <span class="genre-tag">${c.genre || 'Game'}</span>
+                <div class="num">✦ ${c.date || new Date().toLocaleDateString()}</div>
+                <span class="genre-tag">${escapeHtml(c.genre || 'Game')}</span>
                 <div class="name">
                     <div><b>${cleanName}</b></div>
                     <span class="chip" style="background:${fallbackColor}">${fallbackLabel}</span>
                 </div>
             </div>
             
-            <div class="face back" style="display: flex; flex-direction: column; justify-content: space-between; padding: 16px; box-sizing: border-box; height: 100%;">
+            <div class="face back">
                 <div>
                     <div style="font-family:Fraunces;font-size:15px;font-weight:800;color:var(--primary)">StudyBinder Album</div>
                     <hr style="border:none;border-top:2px solid var(--border);margin:10px 0">
@@ -775,7 +798,7 @@ function renderCardTemplate(c){
                 </div>
                 
                 <div style="margin-top: auto; width: 100%;">
-                    <div style="font-size:11px;opacity:.8;margin-bottom:8px;">TRACK RECORD:<br><b>${c.date || '6/30/2026'}</b></div>
+                    <div style="font-size:11px;opacity:.8;margin-bottom:8px;">TRACK RECORD:<br><b>${c.date || new Date().toLocaleDateString()}</b></div>
                     <button onclick="event.stopPropagation(); deleteCardFromAlbum('${cardIdStr}', '${cleanName}')" 
                             style="background: #ff4d4d; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: bold; width: 100%; display: block; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.15);">
                         🗑️ Delete Card
@@ -803,10 +826,12 @@ function bindCardInteractions(scope){
       const r = el.getBoundingClientRect();
       const px=(e.clientX-r.left)/r.width-.5;
       const py=(e.clientY-r.top)/r.height-.5;
-      el.querySelector('.inner').style.transform = `rotateX(${-py*14}deg) rotateY(${px*18}deg)`;
+      const inner = el.querySelector('.inner');
+      if(inner) inner.style.transform = `rotateX(${-py*14}deg) rotateY(${px*18}deg)`;
     };
     el.onpointerleave = () => {
-      if(!el.classList.contains('flipped')) el.querySelector('.inner').style.transform = '';
+      const inner = el.querySelector('.inner');
+      if(!el.classList.contains('flipped') && inner) inner.style.transform = '';
     };
   });
 }
@@ -835,7 +860,6 @@ async function fetchCloudData() {
   renderAll();
 }
 
-// Secret Owner Entry
 let logoClicks = 0;
 if(document.getElementById('hiddenAdminTrigger')) {
   document.getElementById('hiddenAdminTrigger').addEventListener('click', () => {
@@ -1080,15 +1104,6 @@ function toast(msg){
 }
 
 function escapeHtml(s){ return String(s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c])); }
-
-if (supabaseClient) {
-    supabaseClient.auth.getSession().then(({ data: { session } }) => {
-        if (session) {
-            const authBox = document.getElementById('authContainer');
-            if (authBox) authBox.style.display = 'none';
-        }
-    });
-}
 
 tDisplay();
 renderAll();
