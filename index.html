@@ -34,7 +34,7 @@ button{font:inherit;color:inherit;cursor:pointer}
 input,select,textarea{font:inherit}
 img{user-select:none;-webkit-user-drag:none}
 
-/* ============ MASSIVE FULL SCREEN LAYOUT CORRECTIONS ============ */
+/* ============ FULL SCREEN LAYOUT ============ */
 .nav{position:sticky;top:0;z-index:30;backdrop-filter:blur(10px);background:rgba(242,247,242,.85);border-bottom:2px solid var(--border)}
 .nav-inner{width:100%;margin:0;padding:12px 24px;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
 .brand{display:flex;align-items:center;gap:10px;font-family:'Fraunces',serif;font-weight:900;font-size:24px;color:var(--matcha-dark)}
@@ -63,7 +63,6 @@ img{user-select:none;-webkit-user-drag:none}
 .g-cards{grid-template-columns:repeat(auto-fill, minmax(160px,1fr))}
 .page{display:none}
 
-/* 🌟 SLOW SLIDING ANIMATION EFFECT FOR PAGES */
 .page.active{
   display:block;
   animation:slowSlideUp 1.2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
@@ -102,7 +101,7 @@ img{user-select:none;-webkit-user-drag:none}
 .status-planned { background: #fef3c7; color: #d97706; }
 .status-progress { background: #e0f2fe; color: #0284c7; }
 
-/* ============ INTEGRATED BANNER ============ */
+/* ============ INTEGRATED TIMER BANNER ============ */
 .timer-wrap {
   position: relative;
   display: flex;
@@ -460,7 +459,7 @@ img{user-select:none;-webkit-user-drag:none}
    SUPABASE LIVE CONNECTION LAYER CONFIG
 ============================================================ */
 const SUPABASE_URL = "https://tssgtdlmnjmbqdljqvdq.supabase.co"; 
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRzc2d0ZGxtbmptYnFkbGpxdmRxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI3NDkyNTksImV4cCI6MjA5ODMyNTI1OX0.NLkAJ5_mj15ugvsEHOdqkxVQuPI-MJty14qrFe9v0tU";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInRefiI6InRzc2d0ZGxtbmptYnFkbGpxdmRxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI3NDkyNTksImV4cCI6MjA5ODMyNTI1OX0.NLkAJ5_mj15ugvsEHOdqkxVQuPI-MJty14qrFe9v0tU";
 const ADMIN_PASSWORD = "PPWismylife"; 
 
 let supabaseClient = null;
@@ -514,7 +513,6 @@ const DEFAULT_STATE = {
 
 const KEY = 'studybinder-matcha-v6';
 
-/* 🌟 MIGRATION SCRIPT TO PRESERVE & RESTORE LOST 44 CARDS FROM PREVIOUS STORAGE KEYS */
 function load(){
   let currentState = structuredClone(DEFAULT_STATE);
   try{
@@ -525,7 +523,6 @@ function load(){
     }
   }catch(e){ console.error(e); }
 
-  // Check older storage keys automatically
   const possibleOlderKeys = [
     'studybinder-matcha-v5', 
     'studybinder-matcha-v4', 
@@ -890,7 +887,6 @@ async function fetchCloudData() {
   renderAll();
 }
 
-// Secret Owner Entry
 let logoClicks = 0;
 if(document.getElementById('hiddenAdminTrigger')) {
   document.getElementById('hiddenAdminTrigger').addEventListener('click', () => {
