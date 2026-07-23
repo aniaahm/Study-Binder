@@ -584,8 +584,8 @@ function tStart(){
   if(mInput) mInput.disabled = true;
   timerInt = setInterval(()=>{
     timerSec--;
+    tDisplay(); // 👈 Moved this up here so 00:00 displays before finishing
     if(timerSec<=0){ tDone(); }
-    tDisplay();
   },1000);
   if(stagedPhoto) {
     const banner = document.getElementById('pre-lock-banner');
