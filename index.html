@@ -1,0 +1,1098 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>StudyBinder ✦ Collectible Fanbase Space</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700;9..144,900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+/* ============ MATCHA & PINK WHIMSICAL THEME ============ */
+:root{
+  --matcha-bg: #f2f7f2; 
+  --matcha-dark: #3a4f3a; 
+  --sakura-pink: #ffb7d5; 
+  --sakura-light: #fff0f5; 
+  --muted: #6b7e6b;
+  --paper: #ffffff;
+  --border: #d2e0d2;
+  --primary: #ff85b3; 
+  --primary-ink: #ffffff;
+  --shadow: 0 8px 24px rgba(58,79,58,.06);
+  --common: #a4b3a4;
+  --rare: #5aa9ff;
+  --epic: #b063ff;
+  --legendary: #ffae3b;
+  --secret: #ff5fb0;
+}
+*{box-sizing:border-box}
+body{margin:0;padding:0;background:var(--matcha-bg);color:var(--matcha-dark);font:15px/1.5 'Inter',system-ui,sans-serif;min-height:100vh}
+h1,h2,h3,.display{font-family:'Fraunces',serif;letter-spacing:-.02em}
+button{font:inherit;color:inherit;cursor:pointer}
+input,select,textarea{font:inherit}
+img{user-select:none;-webkit-user-drag:none}
+
+/* ============ MASSIVE FULL SCREEN LAYOUT CORRECTIONS ============ */
+.nav{position:sticky;top:0;z-index:30;backdrop-filter:blur(10px);background:rgba(242,247,242,.85);border-bottom:2px solid var(--border)}
+.nav-inner{width:100%;margin:0;padding:12px 24px;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;font-family:'Fraunces',serif;font-weight:900;font-size:24px;color:var(--matcha-dark)}
+.brand img{height:38px;width:auto;object-fit:contain}
+.brand span{color:var(--primary)}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-left:8px}
+.tab{padding:8px 16px;border-radius:999px;border:2px solid var(--border);background:#fff;font-size:13px;font-weight:600;color:var(--matcha-dark)}
+.tab.active{background:var(--sakura-pink);color:var(--matcha-dark);border-color:var(--primary)}
+.stats{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+.stat{display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;background:#fff;border:2px solid var(--border);font-size:13px;font-weight:600}
+.stat b{font-weight:800;color:var(--primary)}
+
+/* 🌟 REMOVED MAX-WIDTH TO RESTORE THE ENTIRE HUGE SCREEN ALIGNMENT */
+.main{width:100%;margin:0;padding:24px 24px 80px}
+.paper{background:var(--paper);border:2px solid var(--border);border-radius:24px;box-shadow:var(--shadow);padding:24px}
+.row{display:flex;gap:24px;flex-wrap:wrap}
+.col{flex:1;min-width:280px}
+
+.btn{display:inline-flex;gap:8px;align-items:center;justify-content:center;padding:10px 20px;border-radius:999px;border:2px solid var(--border);background:#fff;font-weight:700;color:var(--matcha-dark);transition:all 0.2s;text-decoration:none}
+.btn.primary{background:var(--primary);color:var(--primary-ink);border-color:var(--primary)}
+.btn.primary:hover{opacity:0.9}
+.btn.ghost{background:transparent;border-color:transparent}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.muted{color:var(--muted);font-size:13px}
+.center{text-align:center}
+.grid{display:grid;gap:16px}
+.g-cards{grid-template-columns:repeat(auto-fill, minmax(160px,1fr))}
+.page{display:none}
+
+/* 🌟 SLOW SLIDING ANIMATION EFFECT FOR PAGES */
+.page.active{
+  display:block;
+  animation:slowSlideUp 1.2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+@keyframes slowSlideUp{
+  from{opacity:0;transform:translateY(30px)}
+  to{opacity:1;transform:none}
+}
+
+.chip{display:inline-block;padding:4px 10px;border-radius:99px;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase}
+.genre-badge{background:var(--sakura-light);color:var(--matcha-dark);border:1px solid var(--sakura-pink);padding:2px 8px;border-radius:6px;font-size:10px;font-weight:700}
+
+/* ============ GENRE FILTER BAR ============ */
+.genre-bar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:20px;justify-content:center}
+.genre-btn{padding:6px 14px;border-radius:8px;border:1px solid var(--border);background:#fff;font-size:12px;font-weight:600;cursor:pointer}
+.genre-btn.active{background:var(--matcha-dark);color:#fff;border-color:var(--matcha-dark)}
+
+/* ============ Q/A IDEA HUB STYLES ============ */
+.idea-form-card {background: var(--paper); border: 2px solid var(--border); border-radius: 18px; padding: 20px; margin-bottom: 24px;}
+.form-group-hub {margin-bottom: 14px; text-align: left;}
+.form-group-hub label {display: block; font-weight: 700; margin-bottom: 6px; font-size: 13px;}
+.form-group-hub input, .form-group-hub textarea {width: 100%; padding: 10px; border: 2px solid var(--border); border-radius: 10px; font-size: 14px; outline: none;}
+.form-group-hub input:focus, .form-group-hub textarea:focus {border-color: var(--primary);}
+.hub-kofi-card {background: #fffaf0; border: 2px solid #ffd166; border-radius: 18px; padding: 24px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; height: fit-content;}
+.ideas-feed h2 {font-size: 1.3rem; margin-bottom: 15px;}
+.idea-card {background: var(--paper); border: 2px solid var(--border); border-radius: 14px; padding: 16px; margin-bottom: 12px; display: flex; gap: 16px; align-items: flex-start; text-align: left; box-shadow: var(--shadow);}
+.vote-box {display: flex; flex-direction: column; align-items: center; background: var(--matcha-bg); border-radius: 8px; padding: 6px 10px; min-width: 48px; cursor: pointer; border: 1px solid transparent; transition: all 0.2s;}
+.vote-box:hover {border-color: var(--primary); background: var(--sakura-light);}
+.vote-arrow {font-size: 1.1rem; color: var(--muted);}
+.vote-count {font-weight: 700; font-size: 14px;}
+.idea-content {flex-grow: 1;}
+.idea-title {font-size: 16px; font-weight: 700; color: var(--matcha-dark); margin-bottom: 4px;}
+.idea-details {color: var(--muted); font-size: 13px; margin-bottom: 8px;}
+.status-tag {display: inline-block; font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 20px; text-transform: uppercase;}
+.status-review { background: #fee2e2; color: #ef4444; }
+.status-planned { background: #fef3c7; color: #d97706; }
+.status-progress { background: #e0f2fe; color: #0284c7; }
+
+/* ============ INTEGRATED BANNER ============ */
+.timer-wrap {
+  position: relative;
+  display: flex;
+  gap: 32px;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
+  padding: 40px;
+  border-radius: 24px;
+  border: 2px solid var(--border);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  min-height: 380px; /* 🌟 Increased min-height to pull it wider/taller onto full screen */
+  background-color: var(--paper);
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  transition: background-image 0.5s ease-in-out;
+  width: 100%;
+}
+
+.timer-wrap-bg-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.4); 
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  display: none;
+  z-index: 1;
+}
+
+.timer-ring, .timer-wrap > div:not(.timer-wrap-bg-overlay) {
+  position: relative;
+  z-index: 2;
+}
+
+.timer-ring{position:relative;width:240px;height:240px}
+.timer-ring svg{transform:rotate(-90deg)}
+.timer-num{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.timer-num .t{font-family:'Fraunces',serif;font-size:48px;font-weight:900}
+.timer-num .l{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.15em}
+.custom-time-box{background:rgba(255, 255, 255, 0.9);padding:14px 24px;border-radius:18px;border:1px solid var(--border);text-align:center;box-shadow: 0 4px 12px rgba(0,0,0,0.02);}
+.custom-time-box input{width:70px;padding:6px;border-radius:8px;border:2px solid var(--border);text-align:center;font-weight:700;color:var(--matcha-dark);background:#fff}
+
+/* ============ PHOTOCARDS ============ */
+.card{position:relative;border-radius:18px;aspect-ratio:5/7;perspective:1200px;cursor:pointer}
+.card .inner{position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform .5s cubic-bezier(.2,.8,.2,1)}
+.card.flipped .inner{transform:rotateY(180deg)}
+.card .face{position:absolute;inset:0;border-radius:18px;overflow:hidden;backface-visibility:hidden;border:4px solid var(--common);box-shadow:0 8px 20px rgba(58,79,58,.12)}
+.card .face.back{transform:rotateY(180deg);background:var(--sakura-light);padding:16px;display:flex;flex-direction:column;justify-content:space-between;color:var(--matcha-dark)}
+.card .face img{width:100%;height:100%;object-fit:cover;display:block}
+.card .genre-tag{position:absolute;top:8px;right:8px;background:rgba(255,255,255,0.9);padding:2px 6px;border-radius:6px;font-size:10px;font-weight:700;color:var(--matcha-dark);border:1px solid var(--border)}
+.card .num{position:absolute;top:8px;left:8px;background:rgba(255,255,255,.9);border-radius:6px;padding:2px 6px;font-size:10px;font-weight:800}
+.card .name{position:absolute;left:0;right:0;bottom:0;padding:10px;color:#fff;background:linear-gradient(transparent, rgba(0,0,0,.75));display:flex;flex-direction:column;gap:2px;align-items:start}
+.card .name b{font-family:'Fraunces',serif;font-size:13px;line-height:1.2}
+.card.r-common .face{border-color:var(--common)}
+.card.r-rare .face{border-color:var(--rare)}
+.card.r-epic .face{border-color:var(--epic)}
+.card.r-legendary .face{border-color:var(--legendary)}
+.card.r-secret .face{border-color:var(--secret)}
+.card .fx{position:absolute;inset:0;pointer-events:none;mix-blend-mode:overlay;opacity:0}
+.card.r-rare .fx{opacity:.5;background:radial-gradient(circle at 30% 30%, #fff8 0 2px, transparent 3px) 0 0/20px 20px}
+.card.r-epic .fx{opacity:.8;background:linear-gradient(115deg, transparent 30%, rgba(255,255,255,.6) 50%, transparent 70%);background-size:300% 300%;animation:shimmer 3s linear infinite}
+.card.r-legendary .fx, .card.r-secret .fx{opacity:.9;background:conic-gradient(from 0deg, #ff79c6,#ffd166,#06d6a0,#118ab2,#ef476f,#ff79c6);animation:spin 6s linear infinite}
+@keyframes shimmer{0%{background-position:0% 0%}100%{background-position:300% 0%}}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.pre-card-box{width:100%;max-width:180px;aspect-ratio:5/7;border:3px dashed var(--border);border-radius:18px;margin:12px auto;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;overflow:hidden;background:#fafafa}
+.pre-card-box img{width:100%;height:100%;object-fit:cover}
+.pre-card-box .lock-overlay{position:absolute;inset:0;background:rgba(58,79,58,0.75);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:600}
+
+.bigcard{width:min(80vw,280px);aspect-ratio:5/7;margin:0 auto}
+.overlay{position:fixed;inset:0;background:rgba(58,79,58,.6);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;z-index:50;padding:20px}
+.overlay.open{display:flex;animation:fadein .25s}
+.modal{max-width:500px;width:100%;text-align:center;color:var(--matcha-dark);background:#fff;padding:24px;border-radius:28px;border:2px solid var(--border)}
+
+.admin-box{
+  margin-top:30px;
+  border:2px dashed var(--primary);
+  background:var(--sakura-light);
+  display:none;
+}
+.form-group{margin-bottom:12px;text-align:left}
+.form-group label{display:block;font-size:12px;font-weight:700;margin-bottom:4px}
+.form-group input, .form-group select{width:100%;padding:8px 12px;border-radius:8px;border:2px solid var(--border)}
+
+.toasts{position:fixed;right:18px;bottom:18px;z-index:80;display:flex;flex-direction:column;gap:8px}
+.toast{background:var(--matcha-dark);color:#fff;padding:10px 16px;border-radius:12px;font-size:13px;box-shadow:var(--shadow);animation:slidein .25s}
+@keyframes slidein{from{transform:translateX(20px);opacity:0}to{transform:none;opacity:1}}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <div class="brand" id="hiddenAdminTrigger">
+      <img id="site-logo" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'><circle cx='50' cy='50' r='40' fill='%23ffb7d5'/><circle cx='40' cy='45' r='5' fill='%233a4f3a'/><circle cx='60' cy='45' r='5' fill='%233a4f3a'/><path d='M35,60 Q50,75 65,60' stroke='%233a4f3a' stroke-width='5' fill='none'/></svg>" alt="Logo">
+      Study<span>Binder</span>
+    </div>
+    <div class="tabs" id="tabs">
+      <button class="tab active" data-page="study">✦ Study Desk</button>
+      <button class="tab" data-page="collection">✦ Collection Album (<span id="nav-count">0</span>)</button>
+      <button class="tab" data-page="requests">✦ Requests & Support</button>
+    </div>
+    <div class="stats">
+      <div class="stat">✦ Lv <b id="s-level">1</b></div>
+      <div class="stat"><span id="s-xp">0</span>/<span id="s-xpmax">100</span> XP</div>
+      <div class="stat">✦ Streak <b id="s-streak">0</b></div>
+    </div>
+  </div>
+</nav>
+
+<main class="main">
+
+  <section class="page active" id="page-study">
+    <header class="center" style="margin-bottom:30px">
+      <h1 style="font-size:38px;margin:8px 0;color:var(--matcha-dark)">Focus Track Workspace</h1>
+      <p class="muted">Set your customized countdown, optionally stage a character photo, and complete the track to unlock rewards.</p>
+    </header>
+
+    <div class="row">
+      
+      <div class="col" style="flex: 1.8; min-width: 320px;">
+        <div class="timer-wrap">
+          <div class="timer-wrap-bg-overlay"></div>
+          <div class="timer-ring">
+            <svg width="240" height="240" viewBox="0 0 240 240">
+              <circle cx="120" cy="120" r="108" stroke="#e2eee2" stroke-width="12" fill="none"/>
+              <circle id="ring" cx="120" cy="120" r="108" stroke="var(--primary)" stroke-width="12" fill="none"
+                stroke-linecap="round" stroke-dasharray="678.58" stroke-dashoffset="0" style="transition: stroke-dashoffset 0.3s linear;"/>
+            </svg>
+            <div class="timer-num">
+              <div class="t" id="t-display">25:00</div>
+              <div class="l" id="t-label">TRACKING</div>
+            </div>
+          </div>
+          
+          <div style="display:flex; flex-direction:column; gap:16px; align-items:center; min-width: 240px;">
+            <div class="custom-time-box">
+              <label style="display:block;font-size:11px;font-weight:700;margin-bottom:6px;text-transform:uppercase;color:var(--matcha-dark);letter-spacing:0.5px;">⏱ Set Study Minutes</label>
+              <div style="display:flex; align-items:center; justify-content:center; gap:8px;">
+                <input type="number" id="custom-minutes-input" value="25" min="1" max="180">
+                <span style="font-weight:700; color:var(--matcha-dark)">Min</span>
+              </div>
+            </div>
+
+            <div style="display:flex;gap:10px;justify-content:center;align-items:center">
+              <button class="btn primary" id="t-start" style="padding:10px 24px;">Start Track</button>
+              <button class="btn" id="t-pause" style="padding:10px 24px; background:#fff;">Pause</button>
+              <button class="btn ghost" id="t-reset" style="font-weight:700;">Reset</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="paper col" style="max-width:420px; min-width: 300px;">
+        <h3 style="margin-top:0" class="center">✦ Staged Session Photo</h3>
+        <p class="muted center" style="font-size:11px;margin-bottom:8px">Load a photo before starting the track to lock it into your album gallery drops.</p>
+        
+        <div class="pre-card-box" id="pre-dropzone">
+          <div id="pre-empty-state" class="center muted" style="padding:10px">
+            <span style="font-size:24px">✦</span>
+            <p style="margin:5px 0;font-size:11px">No file loaded</p>
+          </div>
+          <img id="pre-img-preview" src="" style="display:none">
+          <div id="pre-lock-banner" class="lock-overlay" style="display:none">
+            <span style="font-size:18px">🔒</span>
+            <span style="margin-top:4px;font-size:11px;text-transform:uppercase;letter-spacing:1px">Locked Until Done</span>
+          </div>
+        </div>
+
+        <div class="center">
+          <div class="form-group" style="margin-bottom:10px">
+            <label style="font-size:11px;text-align:center">Optional Character/Set Name</label>
+            <input type="text" id="user-card-name" placeholder="e.g. My Favorite Bias" style="padding:6px;border:2px solid var(--border);border-radius:8px;width:100%;text-align:center">
+         </div>
+          <div class="form-group" style="margin-bottom:10px">
+            <label style="font-size:11px;text-align:center">Genre Classification</label>
+            <select id="user-card-genre" style="padding:6px;border:2px solid var(--border);border-radius:8px;width:100%;font-size:12px">
+              <option value="BL">BL / yaoi</option>
+              <option value="GL">GL / yuri</option>
+              <option value="K-pop">K-pop</option>
+              <option value="K-drama">k-dramas</option>
+              <option value="T-pop">T-pop</option>
+              <option value="C-drama">C-dramas</option>
+              <option value="T-drama">T-dramas</option>
+              <option value="Anime">Anime</option>
+              <option value="comics">comics</option>
+              <option value="Game">Game Characters</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+
+          <div class="form-group" style="margin-bottom:10px">
+            <label style="font-size:11px;text-align:center">Sub-Genre (e.g. Specific Show / Band Name)</label>
+            <input type="text" id="user-card-subgenre" placeholder="e.g. MDZS, SKZ, JJK, Love in the Air" style="padding:6px;border:2px solid var(--border);border-radius:8px;width:100%;text-align:center">
+          </div>
+          <input type="file" id="user-photo-file" accept="image/*" style="display:none">
+          <button class="btn" id="userBrowseBtn" style="font-size:13px;width:100%">📁 Load Local Graphic</button>
+          
+          <p style="font-size: 11px; color: var(--matcha-dark); opacity: 0.85; margin-top: 8px; text-align: center; font-style: italic;">
+              💡 please upload your own custom photocards! The site will add pre-ready official card drops waiting inside for you to pull.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="paper admin-box" id="adminControlBox">
+      <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer" id="toggleAdmin">
+        <h3 style="margin:0;color:var(--matcha-dark)">⚙ Owner Management Desk (Drop Pool Setup)</h3>
+        <span id="adminArrow">▼ Expand</span>
+      </div>
+      
+      <div id="adminContent" style="display:none;margin-top:15px;border-top:2px solid var(--border);padding-top:15px">
+        <p class="muted" style="margin-top:0">Upload shared global baseline templates into specific genre branches for users.</p>
+        <div class="row">
+          <div class="col">
+            <div class="form-group">
+              <label>Photocard Character Label Title</label>
+              <input type="text" id="adm-name" placeholder="e.g. Wei Wuxian / Lan Wangji">
+            </div>
+            <div class="form-group">
+              <label>Genre Branch Classification</label>
+              <select id="adm-genre">
+                 <option value="BL">BL / yaoi </option>
+                 <option value="GL">GL / yuri </option>
+                 <option value="K-pop">K-pop </option>
+                 <option value="K-drama"> k-dramas</option>
+                 <option value="T-pop">T-pop</option>
+                 <option value="C-drama">C-dramas</option>
+                 <option value="T-drama">T-dramas</option>
+                 <option value="Anime">Anime</option>
+                 <option value="comics">comics</option>
+                 <option value="Game">Game Characters</option>
+                 <option value="Other">Other</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label>Sub-Genre (e.g. Specific Show / Band)</label>
+              <input type="text" id="adm-subgenre" placeholder="e.g. SKZ, MDZS, JJK">
+            </div>
+          </div>
+          <div class="col">
+            <div class="form-group">
+              <label>Frame Quality Tier</label>
+              <select id="adm-rarity">
+                <option value="common">Common Frame</option>
+                <option value="rare">Rare Frame</option>
+                <option value="epic">Epic Holographic Frame</option>
+                <option value="legendary">Legendary Prismatic Frame</option>
+                <option value="secret">Secret Universe Frame</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Upload Base Artwork Source</label>
+              <input type="file" id="adm-file" accept="image/*">
+            </div>
+            <button class="btn primary" id="adm-save-btn" style="width:100%;margin-top:6px">Commit Setup to Cloud Drop Pool</button>
+          </div>
+        </div>
+        <div style="margin-top:15px;display:flex;align-items:center;justify-content:space-between">
+          <span class="muted">Active Drops Pool Capacity: <b id="pool-count">0</b> master pieces loaded.</span>
+          <button class="btn ghost" id="clearPool" style="font-size:11px;color:red;padding:2px 8px">Wipe Current Cloud Pool</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="page" id="page-collection">
+    <header class="center" style="margin-bottom:20px">
+      <h1 style="color:var(--matcha-dark)">Collected Fan Binder</h1>
+      <p class="muted">Flip completed memory card chips to read chronological progress history records.</p>
+    </header>
+
+    <div id="authContainer" style="max-width: 400px; margin: 0 auto 30px auto; padding: 20px; background: #fff; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: center;">
+        <h3 style="font-family: Fraunces; color: var(--matcha-dark); margin-top:0;">Access Your Binder Account</h3>
+        <input type="email" id="authEmail" placeholder="Enter email address" style="width: 100%; padding: 10px; margin: 8px 0; border: 1px solid var(--border); border-radius: 6px; outline:none;">
+        <input type="password" id="authPassword" placeholder="Enter account password" style="width: 100%; padding: 10px; margin: 8px 0; border: 1px solid var(--border); border-radius: 6px; outline:none;">
+        
+        <div style="display: flex; gap: 10px; margin-top: 10px;">
+            <button onclick="handleUserSignUp()" class="btn" style="flex: 1; background: #e2e8f0; color: #334155; font-size:13px;">Sign Up</button>
+            <button onclick="handleUserLogin()" class="btn primary" style="flex: 1; font-size:13px;">Log In</button>
+        </div>
+    </div>
+
+    <div class="genre-bar" id="album-filters">
+        <button class="genre-btn active" data-genre="all">Show All Branches</button>
+        <button class="genre-btn" data-genre="BL">BL</button>
+        <button class="genre-btn" data-genre="GL">GL</button>
+        <button class="genre-btn" data-genre="Anime">Anime</button>
+        <button class="genre-btn" data-genre="K-pop">K-pop</button>
+        <button class="genre-btn" data-genre="T-pop">T-pop</button>
+        <button class="genre-btn" data-genre="k-drama">k-drama</button>
+        <button class="genre-btn" data-genre="c-drama">c-drama</button>
+        <button class="genre-btn" data-genre="T-drama">T-drama</button>
+        <button class="genre-btn" data-genre="comics">comics</button>
+        <button class="genre-btn" data-genre="Game">Games</button>
+        <button class="genre-btn" data-genre="Other">Other</button>
+    </div>
+
+    <div class="grid g-cards" id="collection-grid"></div>
+  </section>
+
+  <section class="page" id="page-requests">
+    <header class="center" style="margin-bottom:30px">
+      <h1 style="color:var(--matcha-dark)">✦ Requests & Support Hub</h1>
+      <p class="muted">Drop your custom photocard recommendations, request your ultimate favorites, and vote on additions!</p>
+    </header>
+
+    <div class="row" style="width:100%; gap:24px;">
+      <div class="col" style="flex: 1.4;">
+        <div class="idea-form-card">
+          <h3 style="margin-top:0; margin-bottom:12px;">📬 Suggest a Photocard Drop</h3>
+          <form id="ideaForm">
+            <div class="form-group-hub">
+              <label for="ideaTitle">Your Request / Bias Title</label>
+              <input type="text" id="ideaTitle" placeholder="e.g., Pink Hair Jimin / MDZS Wedding Set" required>
+            </div>
+            <div class="form-group-hub">
+              <label for="ideaDetails">Specific details or links?</label>
+              <textarea id="ideaDetails" rows="3" placeholder="Tell us which era or specific art variants you want added..." required></textarea>
+            </div>
+            <button type="submit" class="btn primary" style="width:100%; border-radius:10px;">Submit PC Suggestion</button>
+          </form>
+        </div>
+
+        <div class="ideas-feed">
+          <h3 style="text-align: left; margin-bottom: 12px;">✨ Live Community Wishes & Votes</h3>
+          <div id="ideasContainer"></div>
+        </div>
+      </div>
+
+      <div class="col" style="max-width:360px;">
+        <div class="hub-kofi-card">
+          <div style="font-size:36px">☕</div>
+          <h3 style="margin: 4px 0;">Ko-fi Launching Soon!</h3>
+          <p class="muted" style="font-size:12px; margin-bottom:14px;">Fuel our study workspace operations and asset design pools. The tip page is currently under construction and will be active soon!</p>
+          <button class="btn" style="width:100%; cursor: not-allowed; opacity: 0.6;" disabled>☕ Page Opening Soon</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<div class="overlay" id="overlay">
+  <div class="modal" id="modal-body"></div>
+</div>
+
+<div class="toasts" id="toasts"></div>
+
+<script>
+/* ============================================================
+   SUPABASE LIVE CONNECTION LAYER CONFIG
+============================================================ */
+const SUPABASE_URL = "https://tssgtdlmnjmbqdljqvdq.supabase.co"; 
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRzc2d0ZGxtbmptYnFkbGpxdmRxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI3NDkyNTksImV4cCI6MjA5ODMyNTI1OX0.NLkAJ5_mj15ugvsEHOdqkxVQuPI-MJty14qrFe9v0tU";
+const ADMIN_PASSWORD = "PPWismylife"; 
+
+let supabaseClient = null;
+if (SUPABASE_URL !== "YOUR_SUPABASE_URL" && SUPABASE_ANON_KEY !== "YOUR_SUPABASE_ANON_KEY") {
+  supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+}
+
+// ACCOUNT AUTHENTICATION CALLS
+async function handleUserSignUp() {
+    const email = document.getElementById('authEmail').value;
+    const password = document.getElementById('authPassword').value;
+    if(!email || !password) return alert("Please fill in all email and password fields.");
+    if (!supabaseClient) return alert("Supabase configuration setup is missing!");
+
+    const { data, error } = await supabaseClient.auth.signUp({ email, password });
+    if (error) alert("Sign up failure: " + error.message);
+    else alert("Registration check! Please review your mailbox confirmation link verification message.");
+}
+
+async function handleUserLogin() {
+    const email = document.getElementById('authEmail').value;
+    const password = document.getElementById('authPassword').value;
+    if(!email || !password) return alert("Please fill in all email and password fields.");
+    if (!supabaseClient) return alert("Supabase configuration setup is missing!");
+
+    const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+    if (error) alert("Login failure: " + error.message);
+    else {
+        alert("Logged in successfully!");
+        location.reload();
+    }
+}
+
+/* =======================================================
+   ENGINE CONTROLS & STATE CACHE MANAGEMENT
+======================================================= */
+const RARITIES = {
+  common:    {label:'Common',    color:'#a4b3a4', weight:55, xp:10},
+  rare:      {label:'Rare',      color:'#5aa9ff', weight:28, xp:25},
+  epic:      {label:'Epic',      color:'#b063ff', weight:12, xp:50},
+  legendary: {label:'Legendary', color:'#ffae3b', weight:4,  xp:100},
+  secret:    {label:'Secret',    color:'#ff5fb0', weight:1,  xp:250},
+};
+const RARITY_ORDER = ['common','rare','epic','legendary','secret'];
+
+const DEFAULT_STATE = {
+  xp:0, level:1, streak:0, lastStudyDate:null,
+  userCards: [],
+  localVotedList: []
+};
+
+const KEY = 'studybinder-matcha-v6';
+let S = load();
+let cloudRequestsCache = []; 
+let cloudDropsCache = []; 
+let stagedPhoto = null;
+let selectedFilterGenre = 'all';
+let selectedFilterSubGenre = 'all';
+
+function load(){
+  try{
+    const raw = localStorage.getItem(KEY);
+    if(!raw) return structuredClone(DEFAULT_STATE);
+    const parsed = JSON.parse(raw);
+    return {...structuredClone(DEFAULT_STATE), ...parsed};
+  }catch{ return structuredClone(DEFAULT_STATE); }
+}
+function save(){ localStorage.setItem(KEY, JSON.stringify(S)); }
+function xpForLevel(l){ return 100 + (l-1)*60 }
+
+function addXp(n){
+  S.xp += n;
+  while(S.xp >= xpForLevel(S.level)){
+    S.xp -= xpForLevel(S.level);
+    S.level++;
+    toast(`✦ Level Up! Reached Rank Level ${S.level}`);
+  }
+}
+
+function rollRarity(){
+  let r = Math.random() * 100; let running = 0;
+  for(const k of RARITY_ORDER){
+    running += RARITIES[k].weight;
+    if(r <= running) return k;
+  }
+  return 'common';
+}
+
+/* ============================================================
+   TIMER IMPLEMENTATION 
+============================================================ */
+let timerMin = 25, timerSec = 25*60, timerOrig = 25*60, timerInt=null;
+const mInput = document.getElementById('custom-minutes-input');
+
+function updateTimerFromInput() {
+  if (timerInt) return;
+  let val = parseInt(mInput.value, 10);
+  if (isNaN(val) || val < 1) val = 1;
+  if (val > 180) val = 180;
+  timerMin = val;
+  timerSec = val * 60;
+  timerOrig = val * 60;
+  tDisplay();
+}
+if(mInput) mInput.addEventListener('input', updateTimerFromInput);
+
+function tDisplay(){
+  const displayEl = document.getElementById('t-display');
+  if(!displayEl) return;
+  const m=String(Math.floor(timerSec/60)).padStart(2,'0');
+  const s=String(timerSec%60).padStart(2,'0');
+  displayEl.textContent = `${m}:${s}`;
+  const c = 2*Math.PI*108;
+  const ringEl = document.getElementById('ring');
+  if(ringEl) ringEl.style.strokeDashoffset = c*(1-timerSec/timerOrig);
+}
+
+function tStart(){
+  if(timerInt) return;
+  if(mInput) mInput.disabled = true;
+  timerInt = setInterval(()=>{
+    timerSec--;
+    if(timerSec<=0){ tDone(); }
+    tDisplay();
+  },1000);
+  if(stagedPhoto) {
+    const banner = document.getElementById('pre-lock-banner');
+    if(banner) banner.style.cssText = 'display: flex;';
+  }
+}
+function tPause(){ clearInterval(timerInt); timerInt=null; if(mInput) mInput.disabled = false; }
+function tReset(){ tPause(); updateTimerFromInput(); resetStagedArea(); }
+
+function tDone(){
+  tPause();
+  const rarity = rollRarity();
+  const titleField = document.getElementById('user-card-name') ? document.getElementById('user-card-name').value.trim() : '';
+  const genreField = document.getElementById('user-card-genre') ? document.getElementById('user-card-genre').value : 'Other';
+  const subGenreField = document.getElementById('user-card-subgenre') ? document.getElementById('user-card-subgenre').value.trim() : 'all';
+  
+  let finalCardData = {
+    id: 'pc-' + Date.now(),
+    date: new Date().toLocaleDateString(),
+    rarity: rarity,
+    name: titleField || 'Staged Workspace Drop',
+    genre: genreField,
+    sub_genre: subGenreField || 'all'
+  };
+
+  if(stagedPhoto){
+    finalCardData.image = stagedPhoto.data;
+  } else if(cloudDropsCache.length > 0) {
+    let matches = cloudDropsCache.filter(item => item.rarity === rarity);
+    let randomTemplate = matches.length > 0 ? matches[Math.floor(Math.random() * matches.length)] : cloudDropsCache[Math.floor(Math.random() * cloudDropsCache.length)];
+    finalCardData.image = randomTemplate.image;
+    finalCardData.name = randomTemplate.name;
+    finalCardData.genre = randomTemplate.genre || 'Other';
+    if(randomTemplate.sub_genre) finalCardData.sub_genre = randomTemplate.sub_genre;
+  } else {
+    finalCardData.image = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23fff0f5"/><text x="50" y="55" font-family="sans-serif" font-size="8" text-anchor="middle" fill="%233a4f3a">Standard Drop</text></svg>';
+  }
+
+  S.userCards.push(finalCardData);
+  addXp(RARITIES[rarity].xp);
+
+  const today = new Date().toISOString().slice(0,10);
+  if (S.lastStudyDate !== today) {
+    S.streak = (S.lastStudyDate === new Date(Date.now()-86400000).toISOString().slice(0,10)) ? S.streak + 1 : 1;
+    S.lastStudyDate = today;
+  }
+
+  save();
+  triggerReveal(finalCardData);
+  resetStagedArea();
+  renderAll();
+}
+
+function resetStagedArea(){
+  stagedPhoto = null;
+  if(document.getElementById('user-photo-file')) document.getElementById('user-photo-file').value = "";
+  if(document.getElementById('user-card-name')) document.getElementById('user-card-name').value = "";
+  if(document.getElementById('pre-empty-state')) document.getElementById('pre-empty-state').style.display = 'block';
+  if(document.getElementById('pre-img-preview')) document.getElementById('pre-img-preview').style.display = 'none';
+  if(document.getElementById('pre-lock-banner')) document.getElementById('pre-lock-banner').style.display = 'none';
+  
+  const timerCard = document.querySelector('.timer-wrap');
+  if(timerCard) {
+    timerCard.style.backgroundImage = 'none';
+    const overlay = timerCard.querySelector('.timer-wrap-bg-overlay');
+    if(overlay) overlay.style.display = 'none';
+  }
+}
+
+/* ============================================================
+   SUB-FILTERS ROW FOR SECTIONS
+============================================================ */
+function setupDynamicSubFilters() {
+  const albumFilters = document.getElementById('album-filters');
+  if (!albumFilters) return;
+  
+  let subContainer = document.getElementById('sub-genre-bar');
+  if (!subContainer) {
+    subContainer = document.createElement('div');
+    subContainer.id = 'sub-genre-bar';
+    subContainer.style.cssText = "display:none; gap:6px; flex-wrap:wrap; margin-top:10px; margin-bottom:20px; justify-content:center; padding:8px; background:rgba(255,183,213,0.15); border-radius:12px; border:1px dashed var(--sakura-pink); animation:fadein 0.25s ease;";
+    albumFilters.parentNode.insertBefore(subContainer, albumFilters.nextSibling);
+  }
+
+  albumFilters.querySelectorAll('.genre-btn').forEach(btn => {
+    btn.onclick = () => {
+      albumFilters.querySelectorAll('.genre-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      
+      selectedFilterGenre = btn.getAttribute('data-genre') || 'all';
+      selectedFilterSubGenre = 'all'; 
+
+      renderSubFilterRow(subContainer);
+      renderAll();
+    };
+  });
+}
+
+function renderSubFilterRow(container) {
+  if (selectedFilterGenre === 'all') {
+    container.style.display = 'none';
+    return;
+  }
+
+  const uniqueSubs = new Set();
+  S.userCards.forEach(c => {
+    if (c.genre && c.genre.toLowerCase() === selectedFilterGenre.toLowerCase() && c.sub_genre && c.sub_genre !== 'All' && c.sub_genre !== 'all') {
+      uniqueSubs.add(c.sub_genre);
+    }
+  });
+
+  if (uniqueSubs.size === 0) {
+    container.style.display = 'none';
+    return;
+  }
+
+  let html = `<span style="font-size:12px; font-weight:700; color:var(--matcha-dark); display:flex; align-items:center; margin-right:6px;">👉 Sub-sections:</span>`;
+  html += `<button class="genre-btn ${selectedFilterSubGenre === 'all' ? 'active' : ''}" data-sub="all" style="font-size:11px; padding:4px 10px;">Show All ${selectedFilterGenre}</button>`;
+  
+  uniqueSubs.forEach(subName => {
+    html += `<button class="genre-btn ${selectedFilterSubGenre === subName ? 'active' : ''}" data-sub="${subName}" style="font-size:11px; padding:4px 10px;">${subName}</button>`;
+  });
+
+  container.innerHTML = html;
+  container.style.display = 'flex';
+
+  container.querySelectorAll('.genre-btn').forEach(subBtn => {
+    subBtn.onclick = () => {
+      container.querySelectorAll('.genre-btn').forEach(b => b.classList.remove('active'));
+      subBtn.classList.add('active');
+      selectedFilterSubGenre = subBtn.getAttribute('data-sub');
+      renderAll();
+    };
+  });
+}
+
+/* ============================================================
+    REVEAL MODAL DISPLAY & PHOTOCARD DELETION 
+============================================================ */
+function triggerReveal(card){
+  const overlay = document.getElementById('overlay');
+  const modal = document.getElementById('modal-body');
+  if(!overlay || !modal) return;
+  overlay.className = "overlay open";
+  
+  modal.innerHTML = `
+    <div style="display:flex;flex-direction:column;align-items:center;gap:18px">
+      <h2 style="font-family:Fraunces;margin:0;color:var(--matcha-dark)">✦ Drop Unlocked!</h2>
+      <div class="bigcard">${renderCardTemplate(card)}</div>
+      <div>
+        <h3 style="margin:4px 0">${card.name}</h3>
+        <span class="genre-badge">${card.genre}</span>
+      </div>
+      <button class="btn primary" id="closeRevealBtn" style="width:100%">Add To Album</button>
+    </div>
+  `;
+  bindCardInteractions(modal);
+  document.getElementById('closeRevealBtn').onclick = () => { overlay.className = "overlay"; };
+}
+
+function renderCardTemplate(c){
+    const cardIdStr = c.id ? String(c.id) : '';
+    const cleanName = c.name ? escapeHtml(c.name) : 'Staged Workspace Drop';
+    const rarityKey = c.rarity || 'common';
+    const fallbackColor = RARITIES[rarityKey] ? RARITIES[rarityKey].color : '#ccc';
+    const fallbackLabel = RARITIES[rarityKey] ? RARITIES[rarityKey].label : 'Common';
+
+    return `
+    <div class="card r-${rarityKey}" data-id="${cardIdStr}">
+        <div class="inner">
+            <div class="face front">
+                <img src="${c.image || ''}">
+                <div class="fx"></div>
+                <div class="num">✦ ${c.date || '6/30/2026'}</div>
+                <span class="genre-tag">${c.genre || 'Game'}</span>
+                <div class="name">
+                    <div><b>${cleanName}</b></div>
+                    <span class="chip" style="background:${fallbackColor}">${fallbackLabel}</span>
+                </div>
+            </div>
+            
+            <div class="face back" style="display: flex; flex-direction: column; justify-content: space-between; padding: 16px; box-sizing: border-box; height: 100%;">
+                <div>
+                    <div style="font-family:Fraunces;font-size:15px;font-weight:800;color:var(--primary)">StudyBinder Album</div>
+                    <hr style="border:none;border-top:2px solid var(--border);margin:10px 0">
+                    <p style="font-size:12px;color:var(--matcha-dark);margin: 0 0 10px 0;">Processed drop earned cleanly via focused task completion session.</p>
+                </div>
+                
+                <div style="margin-top: auto; width: 100%;">
+                    <div style="font-size:11px;opacity:.8;margin-bottom:8px;">TRACK RECORD:<br><b>${c.date || '6/30/2026'}</b></div>
+                    <button onclick="event.stopPropagation(); deleteCardFromAlbum('${cardIdStr}', '${cleanName}')" 
+                            style="background: #ff4d4d; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: bold; width: 100%; display: block; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.15);">
+                        🗑️ Delete Card
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    `;
+}
+
+function deleteCardFromAlbum(cardId, cardName) {
+    if (!confirm("Are you sure you want to delete this photocard from your binder?")) return;
+    S.userCards = S.userCards.filter(c => c && String(c.id) !== String(cardId));
+    save();
+    toast("Card removed successfully!");
+    renderAll();
+}
+
+function bindCardInteractions(scope){
+  scope.querySelectorAll('.card').forEach(el=>{
+    el.onclick = () => el.classList.toggle('flipped');
+    el.onpointermove = (e) => {
+      if(el.classList.contains('flipped')) return;
+      const r = el.getBoundingClientRect();
+      const px=(e.clientX-r.left)/r.width-.5;
+      const py=(e.clientY-r.top)/r.height-.5;
+      el.querySelector('.inner').style.transform = `rotateX(${-py*14}deg) rotateY(${px*18}deg)`;
+    };
+    el.onpointerleave = () => {
+      if(!el.classList.contains('flipped')) el.querySelector('.inner').style.transform = '';
+    };
+  });
+}
+
+/* ============================================================
+   SUPABASE LIVE DATA SYNC LAYER
+============================================================ */
+async function fetchCloudData() {
+  if (!supabaseClient) {
+    cloudRequestsCache = [
+      {id: 'demo-1', title: 'Add Dark Mode layout setting', details: 'The dashboard background options are bright.', votes: 42, status: 'progress'},
+    ];
+    cloudDropsCache = [];
+    renderRequestsFeed();
+    renderAll();
+    return;
+  }
+  
+  const reqRes = await supabaseClient.from('community_requests').select('*');
+  if (!reqRes.error && reqRes.data) cloudRequestsCache = reqRes.data;
+
+  const dropRes = await supabaseClient.from('master_drops_pool').select('*');
+  if (!dropRes.error && dropRes.data) cloudDropsCache = dropRes.data;
+
+  renderRequestsFeed();
+  renderAll();
+}
+
+// Secret Owner Entry
+let logoClicks = 0;
+if(document.getElementById('hiddenAdminTrigger')) {
+  document.getElementById('hiddenAdminTrigger').addEventListener('click', () => {
+    logoClicks++;
+    if(logoClicks >= 7) {
+      const accessCode = prompt("Enter secret Owner Desk verification password:");
+      if(accessCode === ADMIN_PASSWORD) {
+        document.getElementById('adminControlBox').style.display = 'block';
+        toast("🔑 Owner Desk Access Unlocked!");
+      } else {
+        toast("❌ Wrong validation pass.");
+      }
+      logoClicks = 0;
+    }
+  });
+}
+
+if(document.getElementById('adm-save-btn')) {
+  document.getElementById('adm-save-btn').onclick = async () => {
+    const nameInput = document.getElementById('adm-name');
+    const genreSelect = document.getElementById('adm-genre');
+    const raritySelect = document.getElementById('adm-rarity');
+    const fileInput = document.getElementById('adm-file');
+    const admSubGenreInput = document.getElementById('adm-subgenre');
+    const admSubGenreValue = admSubGenreInput ? admSubGenreInput.value.trim() : 'all';
+    
+    if(!nameInput.value || !fileInput.files[0]){
+      alert("Please write a master template label title and select a graphic file.");
+      return;
+    }
+    
+    const rdr = new FileReader();
+    rdr.onload = async () => {
+      if (supabaseClient) {
+        const { error } = await supabaseClient
+          .from('master_drops_pool')
+          .insert([{ 
+            name: nameInput.value, 
+            genre: genreSelect.value, 
+            sub_genre: admSubGenreValue || 'all',
+            rarity: raritySelect.value, 
+            image: rdr.result 
+          }]);
+        if(error) {
+          alert("Upload error! Your image file might be too big.");
+        } else {
+          toast("✦ Custom design template saved to Cloud Database!");
+          fetchCloudData();
+        }
+      } else {
+        cloudDropsCache.push({ 
+          name: nameInput.value, 
+          genre: genreSelect.value, 
+          sub_genre: admSubGenreValue || 'all',
+          rarity: raritySelect.value, 
+          image: rdr.result 
+        });
+        toast("✦ Local test environment cache loaded.");
+        renderAll();
+      }
+      nameInput.value = ""; fileInput.value = "";
+      if(admSubGenreInput) admSubGenreInput.value = "";
+    };
+    rdr.readAsDataURL(fileInput.files[0]);
+  };
+}
+
+if(document.getElementById('clearPool')) {
+  document.getElementById('clearPool').onclick = async () => {
+    if(confirm("Purge master cloud preset template pool values?")){
+      if(supabaseClient) {
+        await supabaseClient.from('master_drops_pool').delete().neq('name', 'placeholder_safety_row');
+        fetchCloudData();
+      } else {
+        cloudDropsCache = []; renderAll();
+      }
+    }
+  };
+}
+
+if(document.getElementById('ideaForm')) {
+  document.getElementById('ideaForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const title = document.getElementById('ideaTitle').value.trim();
+    const details = document.getElementById('ideaDetails').value.trim();
+    const generatedId = 'req-' + Date.now();
+    
+    if (supabaseClient) {
+      await supabaseClient.from('community_requests').insert([{ id: generatedId, title, details, votes: 1, status: 'review' }]);
+      S.localVotedList.push(generatedId); save(); fetchCloudData();
+    } else {
+      cloudRequestsCache.unshift({ id: generatedId, title, details, votes: 1, status: 'review' });
+      S.localVotedList.push(generatedId); save(); renderRequestsFeed();
+    }
+    document.getElementById('ideaForm').reset();
+    toast("✦ PC Request submitted to the board!");
+  });
+}
+
+async function handleVote(id) {
+  const isVoted = S.localVotedList.includes(id);
+  const TargetRow = cloudRequestsCache.find(r => r.id === id);
+  if (!TargetRow) return;
+
+  let nextVoteValue = isVoted ? (TargetRow.votes || 1) - 1 : (TargetRow.votes || 0) + 1;
+  if(nextVoteValue < 0) nextVoteValue = 0;
+
+  if (supabaseClient) {
+    const { error } = await supabaseClient.from('community_requests').update({ votes: nextVoteValue }).eq('id', id);
+    if (!error) {
+      if (isVoted) S.localVotedList = S.localVotedList.filter(item => item !== id);
+      else S.localVotedList.push(id);
+      save(); fetchCloudData();
+    }
+  } else {
+    TargetRow.votes = nextVoteValue;
+    if (isVoted) S.localVotedList = S.localVotedList.filter(item => item !== id);
+    else S.localVotedList.push(id);
+    save(); renderRequestsFeed();
+  }
+}
+
+function renderRequestsFeed() {
+  const container = document.getElementById('ideasContainer');
+  if(!container) return;
+  const sortedRequests = [...cloudRequestsCache].sort((a,b) => (b.votes || 0) - (a.votes || 0));
+  if(sortedRequests.length === 0) {
+    container.innerHTML = `<p class="muted" style="padding:20px; text-align:center;">No suggestions dropped yet.</p>`;
+    return;
+  }
+  container.innerHTML = sortedRequests.map(r => {
+    const hasUserVoted = S.localVotedList.includes(r.id);
+    let statusClass = 'status-review'; let statusTxt = 'Under Review';
+    if(r.status === 'planned') { statusClass = 'status-planned'; statusTxt = 'Planned'; }
+    if(r.status === 'progress') { statusClass = 'status-progress'; statusTxt = 'In Progress'; }
+    return `
+      <div class="idea-card">
+        <div class="vote-box" onclick="handleVote('${r.id}')" style="${hasUserVoted ? 'border-color:var(--primary); background:var(--sakura-light);' : ''}">
+          <span class="vote-arrow" style="${hasUserVoted ? 'color:var(--primary);' : ''}">▲</span>
+          <span class="vote-count">${r.votes || 0}</span>
+        </div>
+        <div class="idea-content">
+          <div class="idea-title">${escapeHtml(r.title)}</div>
+          <div class="idea-details">${escapeHtml(r.details)}</div>
+          <span class="status-tag ${statusClass}">${statusTxt}</span>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+/* ============================================================
+   UI VIEW SYNCHRONIZATION
+============================================================ */
+function renderAll(){
+  if(document.getElementById('s-level')) document.getElementById('s-level').textContent = S.level;
+  if(document.getElementById('s-xp')) document.getElementById('s-xp').textContent = S.xp;
+  if(document.getElementById('s-xpmax')) document.getElementById('s-xpmax').textContent = xpForLevel(S.level);
+  if(document.getElementById('s-streak')) document.getElementById('s-streak').textContent = S.streak;
+  if(document.getElementById('nav-count')) document.getElementById('nav-count').textContent = S.userCards.length;
+  if(document.getElementById('pool-count')) document.getElementById('pool-count').textContent = cloudDropsCache.length;
+
+  const grid = document.getElementById('collection-grid');
+  if(!grid) return;
+
+  let filtered = S.userCards;
+  if (selectedFilterGenre !== 'all') {
+    filtered = filtered.filter(c => c.genre && c.genre.toLowerCase() === selectedFilterGenre.toLowerCase());
+  }
+  if (typeof selectedFilterSubGenre !== 'undefined' && selectedFilterSubGenre !== 'all') {
+    filtered = filtered.filter(c => c.sub_genre && c.sub_genre === selectedFilterSubGenre);
+  }
+
+  if(filtered.length === 0){
+    grid.innerHTML = `<div class="paper center muted" style="grid-column: 1/-1;padding:40px;">No cards found matching this filter branch yet.</div>`;
+  } else {
+    grid.innerHTML = filtered.map(c => renderCardTemplate(c)).reverse().join('');
+    bindCardInteractions(grid);
+  }
+}
+
+document.querySelectorAll('#tabs .tab').forEach(t => t.onclick = () => {
+  document.querySelectorAll('#tabs .tab').forEach(x=>x.classList.remove('active'));
+  t.classList.add('active');
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  const targetPage = document.getElementById('page-'+t.dataset.page);
+  if(targetPage) targetPage.classList.add('active');
+  if (t.dataset.page === 'requests' || t.dataset.page === 'study') fetchCloudData();
+  renderAll();
+});
+
+setupDynamicSubFilters();
+
+if(document.getElementById('t-start')) document.getElementById('t-start').onclick = tStart;
+if(document.getElementById('t-pause')) document.getElementById('t-pause').onclick = tPause;
+if(document.getElementById('t-reset')) document.getElementById('t-reset').onclick = tReset;
+
+if(document.getElementById('userBrowseBtn')) {
+  document.getElementById('userBrowseBtn').onclick = () => document.getElementById('user-photo-file').click();
+}
+
+if(document.getElementById('user-photo-file')) {
+  document.getElementById('user-photo-file').onchange = (e) => {
+    const f = e.target.files[0]; if(!f) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      stagedPhoto = { data: reader.result };
+      
+      if(document.getElementById('pre-empty-state')) document.getElementById('pre-empty-state').style.display = 'none';
+      const prev = document.getElementById('pre-img-preview');
+      if(prev) { prev.src = reader.result; prev.style.display = 'block'; }
+      
+      const timerCard = document.querySelector('.timer-wrap');
+      if(timerCard) {
+        timerCard.style.backgroundImage = `url('${reader.result}')`;
+        const overlay = timerCard.querySelector('.timer-wrap-bg-overlay');
+        if(overlay) overlay.style.display = 'block';
+      }
+      
+      toast("✦ Graphic loaded & applied to workspace theme!");
+    };
+    reader.readAsDataURL(f);
+  };
+}
+
+if(document.getElementById('toggleAdmin')) {
+  document.getElementById('toggleAdmin').onclick = () => {
+    const content = document.getElementById('adminContent');
+    const arrow = document.getElementById('adminArrow');
+    if(!content || !arrow) return;
+    if(content.style.display === 'none'){ content.style.display = 'block'; arrow.textContent = '▲ Collapse'; }
+    else { content.style.display = 'none'; arrow.textContent = '▼ Expand'; }
+  };
+}
+
+function toast(msg){
+  const container = document.getElementById('toasts');
+  if(!container) return;
+  const el = document.createElement('div'); el.className='toast'; el.textContent=msg;
+  container.appendChild(el);
+  setTimeout(()=>{ el.style.opacity='0'; setTimeout(()=>el.remove(),300); }, 2200);
+}
+
+function escapeHtml(s){ return String(s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c])); }
+
+if (supabaseClient) {
+    supabaseClient.auth.getSession().then(({ data: { session } }) => {
+        if (session) {
+            const authBox = document.getElementById('authContainer');
+            if (authBox) authBox.style.display = 'none';
+        }
+    });
+}
+
+tDisplay();
+renderAll();
+fetchCloudData();
+</script>
+</body>
+</html>
