@@ -551,7 +551,6 @@ const DEFAULT_STATE = {
 let S = structuredClone(DEFAULT_STATE);
 let saveTimeout = null;
 
-// Load state from Supabase when logged in
 async function loadUserData() {
     if (!supabaseClient) return;
     try {
@@ -573,7 +572,6 @@ async function loadUserData() {
     }
 }
 
-// Debounced background sync to Supabase (stops quota crashes)
 function save() {
     if (typeof renderAll === 'function') renderAll();
     if (!supabaseClient) return;
@@ -617,7 +615,7 @@ function rollRarity(){
 }
 
 /* ============================================================
-   TIMER IMPLEMENTATION (FIXED DESKTOP TIMING BUG)
+   TIMER IMPLEMENTATION
 ============================================================ */
 let timerMin = 25, timerSec = 25*60, timerOrig = 25*60, timerInt=null;
 const mInput = document.getElementById('custom-minutes-input');
@@ -725,9 +723,12 @@ function resetStagedArea(){
   }
 }
 
-/* ============================================================
-   SUB-FILTERS ROW FOR SECTIONS
-============================================================ */
+let stagedPhoto = null;
+let cloudDropsCache = [];
+let cloudRequestsCache = [];
+let selectedFilterGenre = 'all';
+let selectedFilterSubGenre = 'all';
+
 function setupDynamicSubFilters() {
   const albumFilters = document.getElementById('album-filters');
   if (!albumFilters) return;
@@ -792,9 +793,6 @@ function renderSubFilterRow(container) {
   });
 }
 
-/* ============================================================
-    REVEAL MODAL DISPLAY & PHOTOCARD DELETION 
-============================================================ */
 function triggerReveal(card){
   const overlay = document.getElementById('overlay');
   const modal = document.getElementById('modal-body');
@@ -881,9 +879,6 @@ function bindCardInteractions(scope){
   });
 }
 
-/* ============================================================
-   SUPABASE LIVE DATA SYNC LAYER
-============================================================ */
 async function fetchCloudData() {
   if (!supabaseClient) {
     cloudRequestsCache = [
@@ -905,7 +900,6 @@ async function fetchCloudData() {
   renderAll();
 }
 
-// Secret Owner Entry
 let logoClicks = 0;
 if(document.getElementById('hiddenAdminTrigger')) {
   document.getElementById('hiddenAdminTrigger').addEventListener('click', () => {
@@ -963,8 +957,6 @@ if(document.getElementById('adm-save-btn')) {
         if(admSubGenreInput) admSubGenreInput.value = "";
     };
 }
-  };
-}
 
 if(document.getElementById('clearPool')) {
   document.getElementById('clearPool').onclick = async () => {
@@ -976,7 +968,8 @@ if(document.getElementById('clearPool')) {
         cloudDropsCache = []; renderAll();
       }
     }
-  
+  };
+}
 
 if(document.getElementById('ideaForm')) {
   document.getElementById('ideaForm').addEventListener('submit', async function(e) {
@@ -1049,9 +1042,6 @@ function renderRequestsFeed() {
   }).join('');
 }
 
-/* ============================================================
-   UI VIEW SYNCHRONIZATION
-============================================================ */
 function renderAll(){
   if(document.getElementById('s-level')) document.getElementById('s-level').textContent = S.level;
   if(document.getElementById('s-xp')) document.getElementById('s-xp').textContent = S.xp;
