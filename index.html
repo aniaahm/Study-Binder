@@ -463,6 +463,33 @@ img{user-select:none;-webkit-user-drag:none}
 <div class="toasts" id="toasts"></div>
 
 <script>
+  async function uploadFileToSupabase(file) {
+    if (!supabaseClient) return null;
+    try {
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Date.now()}_${Math.random().toString(36).substring(2, 9)}.${fileExt}`;
+        const filePath = `${fileName}`;
+
+        const { error: uploadError } = await supabaseClient.storage
+            .from('studybinder-uploads')
+            .upload(filePath, file);
+
+        if (uploadError) {
+            console.error("Storage upload error:", uploadError);
+            alert("Image upload failed: " + uploadError.message);
+            return null;
+        }
+
+        const { data } = supabaseClient.storage
+            .from('studybinder-uploads')
+            .getPublicUrl(filePath);
+
+        return data.publicUrl;
+    } catch (err) {
+        console.error("Error uploading file:", err);
+        return null;
+    }
+}
 /* ============================================================
    SUPABASE LIVE CONNECTION LAYER CONFIG
 ============================================================ */
@@ -514,28 +541,61 @@ const RARITIES = {
 const RARITY_ORDER = ['common','rare','epic','legendary','secret'];
 
 const DEFAULT_STATE = {
-  xp:0, level:1, streak:0, lastStudyDate:null,
+  xp: 0,
+  level:1,
+  streak:0,
+  lastStudyDate:null,
   userCards: [],
   localVotedList: []
-};
+}; 
+let S = structuredClone(DEFAULT_STATE);
+let saveTimeout = null;
 
-const KEY = 'studybinder-matcha-v6';
-let S = load();
-let cloudRequestsCache = []; 
-let cloudDropsCache = []; 
-let stagedPhoto = null;
-let selectedFilterGenre = 'all';
-let selectedFilterSubGenre = 'all';
-
-function load(){
-  try{
-    const raw = localStorage.getItem(KEY);
-    if(!raw) return structuredClone(DEFAULT_STATE);
-    const parsed = JSON.parse(raw);
-    return {...structuredClone(DEFAULT_STATE), ...parsed};
-  }catch{ return structuredClone(DEFAULT_STATE); }
+// Load state from Supabase when logged in
+async function loadUserData() {
+    if (!supabaseClient) return;
+    try {
+        const { data: { session } } = await supabaseClient.auth.getSession();
+        if (!session) return;
+        
+        const { data, error } = await supabaseClient
+            .from('user_states')
+            .select('state_data')
+            .eq('user_id', session.user.id)
+            .single();
+            
+        if (data && data.state_data) {
+            S = { ...structuredClone(DEFAULT_STATE), ...data.state_data };
+            if (typeof renderAll === 'function') renderAll();
+        }
+    } catch (err) {
+        console.error("Error loading user state from Supabase:", err);
+    }
 }
-function save(){ localStorage.setItem(KEY, JSON.stringify(S)); }
+
+// Debounced background sync to Supabase (stops quota crashes)
+function save() {
+    if (typeof renderAll === 'function') renderAll();
+    if (!supabaseClient) return;
+    
+    if (saveTimeout) clearTimeout(saveTimeout);
+    saveTimeout = setTimeout(async () => {
+        try {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (!session) return;
+            
+            await supabaseClient
+                .from('user_states')
+                .upsert({ 
+                    user_id: session.user.id, 
+                    state_data: S,
+                    updated_at: new Date()
+                }, { onConflict: 'user_id' });
+        } catch (err) {
+            console.error("Error syncing state to Supabase:", err);
+        }
+    }, 1000);
+}
 function xpForLevel(l){ return 100 + (l-1)*60 }
 
 function addXp(n){
@@ -864,52 +924,45 @@ if(document.getElementById('hiddenAdminTrigger')) {
 }
 
 if(document.getElementById('adm-save-btn')) {
-  document.getElementById('adm-save-btn').onclick = async () => {
-    const nameInput = document.getElementById('adm-name');
-    const genreSelect = document.getElementById('adm-genre');
-    const raritySelect = document.getElementById('adm-rarity');
-    const fileInput = document.getElementById('adm-file');
-    const admSubGenreInput = document.getElementById('adm-subgenre');
-    const admSubGenreValue = admSubGenreInput ? admSubGenreInput.value.trim() : 'all';
-    
-    if(!nameInput.value || !fileInput.files[0]){
-      alert("Please write a master template label title and select a graphic file.");
-      return;
-    }
-    
-    const rdr = new FileReader();
-    rdr.onload = async () => {
-      if (supabaseClient) {
-        const { error } = await supabaseClient
-          .from('master_drops_pool')
-          .insert([{ 
-            name: nameInput.value, 
-            genre: genreSelect.value, 
-            sub_genre: admSubGenreValue || 'all',
-            rarity: raritySelect.value, 
-            image: rdr.result 
-          }]);
-        if(error) {
-          alert("Upload error! Your image file might be too big.");
-        } else {
-          toast("✦ Custom design template saved to Cloud Database!");
-          fetchCloudData();
+    document.getElementById('adm-save-btn').onclick = async () => {
+        const nameInput = document.getElementById('adm-name');
+        const genreSelect = document.getElementById('adm-genre');
+        const raritySelect = document.getElementById('adm-rarity');
+        const fileInput = document.getElementById('adm-file');
+        const admSubGenreInput = document.getElementById('adm-subgenre');
+        const admSubGenreValue = admSubGenreInput ? admSubGenreInput.value.trim() : 'all';
+        
+        if(!nameInput.value || !fileInput.files[0]){
+            alert("Please write a master template label title and select a graphic file.");
+            return;
         }
-      } else {
-        cloudDropsCache.push({ 
-          name: nameInput.value, 
-          genre: genreSelect.value, 
-          sub_genre: admSubGenreValue || 'all',
-          rarity: raritySelect.value, 
-          image: rdr.result 
-        });
-        toast("✦ Local test environment cache loaded.");
-        renderAll();
-      }
-      nameInput.value = ""; fileInput.value = "";
-      if(admSubGenreInput) admSubGenreInput.value = "";
+
+        if(typeof toast === 'function') toast("✦ Uploading image to Supabase Storage...");
+        const publicUrl = await uploadFileToSupabase(fileInput.files[0]);
+        if (!publicUrl) return;
+
+        if (supabaseClient) {
+            const { error } = await supabaseClient
+                .from('master_drops_pool')
+                .insert([{ 
+                    name: nameInput.value, 
+                    genre: genreSelect.value, 
+                    sub_genre: admSubGenreValue || 'all', 
+                    rarity: raritySelect.value, 
+                    image: publicUrl 
+                }]);
+            if(error) {
+                alert("Database insert error: " + error.message);
+            } else {
+                if(typeof toast === 'function') toast("✦ Custom design template saved to Cloud Database!");
+                if(typeof fetchCloudData === 'function') fetchCloudData();
+            }
+        }
+        nameInput.value = "";
+        fileInput.value = "";
+        if(admSubGenreInput) admSubGenreInput.value = "";
     };
-    rdr.readAsDataURL(fileInput.files[0]);
+}
   };
 }
 
@@ -923,8 +976,7 @@ if(document.getElementById('clearPool')) {
         cloudDropsCache = []; renderAll();
       }
     }
-  };
-}
+  
 
 if(document.getElementById('ideaForm')) {
   document.getElementById('ideaForm').addEventListener('submit', async function(e) {
@@ -1092,10 +1144,17 @@ function toast(msg){
 function escapeHtml(s){ return String(s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c])); }
 
 if (supabaseClient) {
-    supabaseClient.auth.getSession().then(({ data: { session } }) => {
+    supabaseClient.auth.getSession().then(async ({ data: { session } }) => {
         if (session) {
+            await loadUserData();
             const authBox = document.getElementById('authContainer');
-            if (authBox) authBox.style.display = 'none';
+            if(authBox) authBox.style.display = 'none';
+        }
+    });
+
+    supabaseClient.auth.onAuthStateChange(async (event, session) => {
+        if (session) {
+            await loadUserData();
         }
     });
 }
