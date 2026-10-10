@@ -25,7 +25,7 @@
   --common: #a4b3a4;
   --rare: #5aa9ff;
   --epic: #b063ff;
-  --legendary: #ffae3b;
+  --legendary: #e0346d;
   --secret: #ff5fb0;
 }
 *{box-sizing:border-box}
@@ -164,18 +164,79 @@ img{user-select:none;-webkit-user-drag:none}
 .card.r-legendary .face{border-color:var(--legendary)}
 .card.r-secret .face{border-color:var(--secret)}
 
-/* Fixed Hologram Sheen Effect (Non-spinning overlay shimmer) */
-.card .fx{position:absolute;inset:0;pointer-events:none;mix-blend-mode:color-dodge;opacity:0;transition:opacity 0.3s ease;}
-.card.r-rare .fx{opacity:.4;background:radial-gradient(circle at 30% 30%, #fff8 0 2px, transparent 3px) 0 0/20px 20px}
-.card.r-epic .fx{opacity:.6;background:linear-gradient(115deg, transparent 20%, rgba(255,255,255,.8) 50%, transparent 80%);background-size:200% 200%;animation:shimmer 4s ease infinite}
-.card.r-legendary .fx, .card.r-secret .fx{
-  opacity:.75;
-  background: linear-gradient(135deg, rgba(255,121,198,0.4), rgba(255,209,102,0.4), rgba(6,214,160,0.4), rgba(17,138,178,0.4));
-  background-size: 300% 300%;
-  animation: holoShift 5s ease infinite alternate;
+/* Rarity effects: each high tier has its own unmistakable finish */
+.card .fx{
+  position:absolute;inset:0;pointer-events:none;opacity:0;
+  transition:opacity .3s ease;overflow:hidden;border-radius:inherit;
+}
+.card.r-rare .fx{
+  opacity:.4;
+  background:radial-gradient(circle at 30% 30%, #fff 0 1.5px, transparent 3px) 0 0/20px 20px;
+  mix-blend-mode:screen;
+}
+.card.r-epic .fx{
+  opacity:.6;
+  background:linear-gradient(115deg,transparent 20%,rgba(255,255,255,.85) 50%,transparent 80%);
+  background-size:200% 200%;animation:shimmer 4s ease infinite;
+  mix-blend-mode:screen;
+}
+
+/* LEGENDARY = pink-edged chrome sheet + fine glitter flecks */
+.card.r-legendary .face{border-color:#e0346d}
+.card.r-legendary .fx{
+  opacity:.82;
+  background:
+    radial-gradient(circle,rgba(255,255,255,.95) 0 1px,transparent 1.8px) 0 0/13px 17px,
+    radial-gradient(circle,rgba(255,255,255,.7) 0 1px,transparent 2px) 6px 8px/23px 27px,
+    linear-gradient(115deg,
+      rgba(255,255,255,.05) 0%,
+      rgba(255,255,255,.78) 12%,
+      rgba(224,52,109,.22) 20%,
+      rgba(190,245,255,.58) 31%,
+      rgba(255,255,255,.08) 40%,
+      rgba(255,235,250,.68) 52%,
+      rgba(160,210,255,.42) 63%,
+      rgba(255,255,255,.08) 72%,
+      rgba(224,52,109,.28) 84%,
+      rgba(255,255,255,.55) 100%);
+  background-size:13px 17px,23px 27px,240% 240%;
+  animation:chromeGlint 4.5s ease-in-out infinite alternate;
+  mix-blend-mode:screen;
+}
+
+/* SECRET = deep rosy cosmic sheen with twinkling, blinking starbursts */
+.card.r-secret .fx{
+  opacity:.95;
+  background:
+    radial-gradient(ellipse at 50% 110%,rgba(255,95,176,.55),transparent 62%),
+    linear-gradient(145deg,rgba(255,255,255,.12),rgba(255,95,176,.18),rgba(190,170,255,.2));
+  mix-blend-mode:screen;
+}
+.card.r-secret .fx::before,
+.card.r-secret .fx::after{
+  content:"✦  ·  ✧     ✧  ·  ✦";
+  position:absolute;left:5%;right:5%;color:#fff;
+  font-family:Georgia,serif;font-size:clamp(15px,2.2vw,24px);
+  letter-spacing:.2em;text-align:center;
+  text-shadow:0 0 5px #fff,0 0 12px #ff5fb0,0 0 20px #ff9bd0;
+  animation:secretTwinkle 1.8s ease-in-out infinite;
+}
+.card.r-secret .fx::before{top:18%;transform:rotate(-12deg)}
+.card.r-secret .fx::after{
+  content:"✧     ✦  ·  ✧";
+  top:58%;font-size:clamp(13px,1.8vw,20px);
+  animation-delay:.8s;transform:rotate(10deg);
 }
 @keyframes shimmer{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
-@keyframes holoShift{0%{background-position:0% 0%}100%{background-position:100% 100%}}
+@keyframes chromeGlint{
+  0%{background-position:0 0,6px 8px,0% 50%;filter:saturate(1)}
+  100%{background-position:13px 17px,29px 35px,100% 50%;filter:saturate(1.35)}
+}
+@keyframes secretTwinkle{
+  0%,100%{opacity:.25;filter:brightness(.8);text-shadow:0 0 3px #fff,0 0 8px #ff5fb0}
+  45%{opacity:1;filter:brightness(1.7);text-shadow:0 0 7px #fff,0 0 16px #ff5fb0,0 0 25px #fff}
+  60%{opacity:.55}
+}100%{background-position:100% 100%}}
 
 .pre-card-box{width:100%;max-width:180px;aspect-ratio:5/7;border:3px dashed var(--border);border-radius:18px;margin:12px auto;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;overflow:hidden;background:#fafafa}
 .pre-card-box img{width:100%;height:100%;object-fit:cover}
@@ -535,7 +596,7 @@ const RARITIES = {
   common:    {label:'Common',    color:'#a4b3a4', weight:55, xp:10},
   rare:      {label:'Rare',      color:'#5aa9ff', weight:28, xp:25},
   epic:      {label:'Epic',      color:'#b063ff', weight:12, xp:50},
-  legendary: {label:'Legendary', color:'#ffae3b', weight:4,  xp:100},
+  legendary: {label:'Legendary', color:'#e0346d', weight:4,  xp:100},
   secret:    {label:'Secret',    color:'#ff5fb0', weight:1,  xp:250},
 };
 const RARITY_ORDER = ['common','rare','epic','legendary','secret'];
