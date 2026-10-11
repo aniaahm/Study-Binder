@@ -22,7 +22,7 @@
   --primary: #ff85b3; 
   --primary-ink: #ffffff;
   --shadow: 0 8px 24px rgba(58,79,58,.06);
-  --common: #a4b3a4;
+  --common: #e6f1ff;
   --rare: #5aa9ff;
   --epic: #b063ff;
   --legendary: #e0346d;
@@ -181,63 +181,70 @@ img{user-select:none;-webkit-user-drag:none}
   mix-blend-mode:screen;
 }
 
-/* LEGENDARY = pink-edged chrome sheet + fine glitter flecks */
+/* LEGENDARY = Rainbow Holographic card style */
 .card.r-legendary .face{border-color:#e0346d}
 .card.r-legendary .fx{
-  opacity:.82;
+  opacity:.85;
   background:
-    radial-gradient(circle,rgba(255,255,255,.95) 0 1px,transparent 1.8px) 0 0/13px 17px,
-    radial-gradient(circle,rgba(255,255,255,.7) 0 1px,transparent 2px) 6px 8px/23px 27px,
-    linear-gradient(115deg,
-      rgba(255,255,255,.05) 0%,
-      rgba(255,255,255,.78) 12%,
-      rgba(224,52,109,.22) 20%,
-      rgba(190,245,255,.58) 31%,
-      rgba(255,255,255,.08) 40%,
-      rgba(255,235,250,.68) 52%,
-      rgba(160,210,255,.42) 63%,
-      rgba(255,255,255,.08) 72%,
-      rgba(224,52,109,.28) 84%,
-      rgba(255,255,255,.55) 100%);
-  background-size:13px 17px,23px 27px,240% 240%;
-  animation:chromeGlint 4.5s ease-in-out infinite alternate;
-  mix-blend-mode:screen;
+    linear-gradient(135deg, 
+      rgba(255, 0, 128, 0.2), 
+      rgba(255, 255, 0, 0.25), 
+      rgba(0, 255, 255, 0.25), 
+      rgba(128, 0, 255, 0.2), 
+      rgba(255, 0, 128, 0.2)
+    );
+  background-size: 300% 300%;
+  animation: holoShift 6s ease infinite;
+  mix-blend-mode: color-dodge;
 }
 
-/* SECRET = deep rosy cosmic sheen with twinkling, blinking starbursts */
+/* SECRET = Rosy cosmic sheen with left/right side sticker accents */
+.card.r-secret .face{border-color:#ff5fb0}
 .card.r-secret .fx{
-  opacity:.95;
+  opacity:.92;
   background:
-    radial-gradient(ellipse at 50% 110%,rgba(255,95,176,.55),transparent 62%),
-    linear-gradient(145deg,rgba(255,255,255,.12),rgba(255,95,176,.18),rgba(190,170,255,.2));
-  mix-blend-mode:screen;
+    radial-gradient(circle, rgba(255,255,255,.9) 0 1.5px, transparent 2px) 0 0 / 18px 22px,
+    radial-gradient(circle, rgba(255,180,220,.7) 0 3px, transparent 6px) 10px 12px / 28px 32px,
+    linear-gradient(145deg, rgba(255,95,176,.25), rgba(190,170,255,.35));
+  mix-blend-mode: screen;
 }
-.card.r-secret .fx::before,
-.card.r-secret .fx::after{
-  content:"✦  ·  ✧     ✧  ·  ✦";
-  position:absolute;left:5%;right:5%;color:#fff;
-  font-family:Georgia,serif;font-size:clamp(15px,2.2vw,24px);
-  letter-spacing:.2em;text-align:center;
-  text-shadow:0 0 5px #fff,0 0 12px #ff5fb0,0 0 20px #ff9bd0;
+
+/* Left side accent (Stars, dots, and angel wings) */
+.card.r-secret .fx::before{
+  content:"✦\A·\A𝜗𝜚\A·\A໒꒱";
+  white-space: pre;
+  position:absolute; left:12px; top:32%;
+  color:#fff;
+  font-family:Georgia,serif; font-size:clamp(14px, 2vw, 20px);
+  line-height: 1.6; text-align: left;
+  text-shadow:0 0 5px #fff,0 0 12px #ff5fb0;
   animation:secretTwinkle 1.8s ease-in-out infinite;
 }
-.card.r-secret .fx::before{top:18%;transform:rotate(-12deg)}
+
+/* Right side accent (Stars and glowing polka dots) */
 .card.r-secret .fx::after{
-  content:"✧     ✦  ·  ✧";
-  top:58%;font-size:clamp(13px,1.8vw,20px);
-  animation-delay:.8s;transform:rotate(10deg);
-}
-@keyframes shimmer{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
-@keyframes chromeGlint{
-  0%{background-position:0 0,6px 8px,0% 50%;filter:saturate(1)}
-  100%{background-position:13px 17px,29px 35px,100% 50%;filter:saturate(1.35)}
-}
-@keyframes secretTwinkle{
-  0%,100%{opacity:.25;filter:brightness(.8);text-shadow:0 0 3px #fff,0 0 8px #ff5fb0}
-  45%{opacity:1;filter:brightness(1.7);text-shadow:0 0 7px #fff,0 0 16px #ff5fb0,0 0 25px #fff}
-  60%{opacity:.55}
+  content:"✧\A·\A✦\A·\A✧";
+  white-space: pre;
+  position:absolute; right:12px; top:28%;
+  color:#fff;
+  font-family:Georgia,serif; font-size:clamp(14px, 2vw, 20px);
+  line-height: 1.8; text-align: right;
+  text-shadow:0 0 5px #fff,0 0 12px #ff5fb0;
+  animation:secretTwinkle 1.8s ease-in-out infinite;
+  animation-delay:.8s;
 }
 
+@keyframes holoShift {
+  0% { background-position: 0% 50%; filter: brightness(1) saturate(1.2); }
+  50% { background-position: 100% 50%; filter: brightness(1.3) saturate(1.6); }
+  100% { background-position: 0% 50%; filter: brightness(1) saturate(1.2); }
+}
+
+@keyframes secretTwinkle{
+  0%,100%{opacity:.3; filter:brightness(.8); text-shadow:0 0 3px #fff,0 0 8px #ff5fb0}
+  45%{opacity:1; filter:brightness(1.6); text-shadow:0 0 7px #fff,0 0 16px #ff5fb0,0 0 22px #fff}
+  60%{opacity:.6}
+}
 .pre-card-box{width:100%;max-width:180px;aspect-ratio:5/7;border:3px dashed var(--border);border-radius:18px;margin:12px auto;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;overflow:hidden;background:#fafafa}
 .pre-card-box img{width:100%;height:100%;object-fit:cover}
 .pre-card-box .lock-overlay{position:absolute;inset:0;background:rgba(58,79,58,0.75);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:600}
@@ -593,7 +600,7 @@ async function handleUserLogin() {
    ENGINE CONTROLS & STATE CACHE MANAGEMENT
 ======================================================= */
 const RARITIES = {
-  common:    {label:'Common',    color:'#a4b3a4', weight:55, xp:10},
+  common:    {label:'Common',    color:'#e6f1ff', weight:55, xp:10},
   rare:      {label:'Rare',      color:'#5aa9ff', weight:28, xp:25},
   epic:      {label:'Epic',      color:'#b063ff', weight:12, xp:50},
   legendary: {label:'Legendary', color:'#e0346d', weight:4,  xp:100},
