@@ -191,38 +191,47 @@ img{user-select:none;-webkit-user-drag:none}
 }
 
 /* =========================================================
-   RARE CARD (Clean Glass Sheen - No Dots)
+   RARE CARD (Vibrant Electric Blue Sparkle Sheen)
    ========================================================= */
-.card.r-rare .face { border-color: #3b82f6; }
+.card.r-rare .face { border-color: #00b4d8; }
 .card.r-rare .fx {
-  opacity: .75;
-  background: linear-gradient(135deg, rgba(59,130,246,.3) 0%, rgba(255,255,255,.4) 50%, rgba(30,64,175,.2) 100%);
-  mix-blend-mode: overlay;
+  opacity: .85;
+  background: 
+    radial-gradient(circle, rgba(255,255,255,.9) 0 1.5px, transparent 2px) 0 0 / 16px 20px,
+    linear-gradient(135deg, rgba(0, 180, 216, 0.35), rgba(144, 224, 239, 0.45), rgba(0, 119, 182, 0.3));
+  background-size: 16px 20px, 200% 200%;
+  animation: rareGlint 4s ease infinite alternate;
+  mix-blend-mode: screen;
+}
+
+@keyframes rareGlint {
+  0% { background-position: 0 0, 0% 50%; }
+  100% { background-position: 16px 20px, 100% 50%; }
 }
 
 /* =========================================================
-   EPIC CARD (White Scanning / Flashing Effect)
+   EPIC CARD (Smooth Infinite Scanning Loop)
    ========================================================= */
 .card.r-epic .face { border-color: #a855f7; }
 .card.r-epic .fx {
-  opacity: .85;
+  opacity: .9;
   background: 
     linear-gradient(
       110deg,
-      transparent 25%,
-      rgba(255, 255, 255, 0.6) 45%,
-      rgba(255, 255, 255, 0.9) 50%,
-      rgba(255, 255, 255, 0.6) 55%,
-      transparent 75%
+      transparent 30%,
+      rgba(255, 255, 255, 0.8) 48%,
+      rgba(255, 255, 255, 1) 50%,
+      rgba(255, 255, 255, 0.8) 52%,
+      transparent 70%
     );
-  background-size: 250% 250%;
-  animation: epicScan 3.5s ease-in-out infinite;
+  background-size: 200% 100%;
+  animation: epicScanLoop 2.5s linear infinite;
   mix-blend-mode: overlay;
 }
 
-@keyframes epicScan {
-  0% { background-position: -100% -100%; }
-  100% { background-position: 200% 200%; }
+@keyframes epicScanLoop {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
 }
 
 /* =========================================================
@@ -263,7 +272,6 @@ img{user-select:none;-webkit-user-drag:none}
   mix-blend-mode: screen;
 }
 
-/* Left side sticker accents */
 .card.r-secret .fx::before {
   content: "✦  𝜗𝜚  ໒꒱";
   position: absolute; left: 10px; top: 35%;
@@ -273,7 +281,6 @@ img{user-select:none;-webkit-user-drag:none}
   animation: secretTwinkle 1.8s ease-in-out infinite;
 }
 
-/* Right side sticker accents */
 .card.r-secret .fx::after {
   content: "✧  ✦  ✧";
   position: absolute; right: 10px; top: 35%;
