@@ -195,15 +195,19 @@ img{user-select:none;-webkit-user-drag:none}
    ========================================================= */
 .card.r-rare .face { border-color: #00b4d8; }
 .card.r-rare .fx {
-  opacity: .85;
+  opacity: .9;
   background: 
-    radial-gradient(circle, rgba(255,255,255,.9) 0 1.5px, transparent 2px) 0 0 / 16px 20px,
-    linear-gradient(135deg, rgba(0, 180, 216, 0.35), rgba(144, 224, 239, 0.45), rgba(0, 119, 182, 0.3));
-  background-size: 16px 20px, 200% 200%;
-  animation: rareGlint 4s ease infinite alternate;
+    /* Scattered rhinestone jewels using radial gradients */
+    radial-gradient(circle at 18% 25%, rgba(255,255,255,.95) 0 3px, #00b4d8 5px, transparent 6px),
+    radial-gradient(circle at 82% 15%, rgba(255,255,255,.95) 0 2.5px, #90e0ef 4px, transparent 5px),
+    radial-gradient(circle at 50% 42%, rgba(255,255,255,.95) 0 4px, #0077b6 6px, transparent 7px),
+    radial-gradient(circle at 88% 55%, rgba(255,255,255,.95) 0 3px, #00b4d8 4.5px, transparent 5.5px),
+    radial-gradient(circle at 22% 75%, rgba(255,255,255,.95) 0 3.5px, #90e0ef 5px, transparent 6px),
+    radial-gradient(circle at 75% 85%, rgba(255,255,255,.95) 0 3px, #0077b6 4.5px, transparent 5.5px),
+    linear-gradient(135deg, rgba(0, 180, 216, 0.25), rgba(144, 224, 239, 0.35));
+  background-size: 100% 100%;
   mix-blend-mode: screen;
 }
-
 @keyframes rareGlint {
   0% { background-position: 0 0, 0% 50%; }
   100% { background-position: 16px 20px, 100% 50%; }
